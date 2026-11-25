@@ -1,9 +1,9 @@
 # PROJECT_PROGRESS
 
-Last update: 2026-11-26 (verification refresh). Statuses: NOT STARTED · IN PROGRESS · BLOCKED · IMPLEMENTED · TESTED · VERIFIED (= tested + checked in a real browser).
+Last update: 2026-11-26 (Kiln & Signal frontend refresh). Statuses: NOT STARTED · IN PROGRESS · BLOCKED · IMPLEMENTED · TESTED · VERIFIED (= tested + checked in a real browser).
 
 ## Current status
-Functional MVP with demo mode and Gemini provider support. Gemini is configured in the local ignored `backend/.env`; no API key is stored in this repository. Main business workflow passes in the backend suite, and the earlier real-browser workflow is recorded below.
+Functional MVP rebranded as Kiln & Signal. The frontend has a warm monochrome palette, editorial type, and restrained ambient motion; the backend workflow and API were left unchanged. Gemini is configured in the local ignored `backend/.env`; no API key is stored in this repository. The latest backend suite passes, and the earlier real-browser workflow is recorded below.
 
 ## Features
 | Feature | Status | Evidence |
@@ -23,7 +23,7 @@ Functional MVP with demo mode and Gemini provider support. Gemini is configured 
 | Analytics from DB + empty states | VERIFIED | `test_empty_analytics`, browser step 15 |
 | Settings (business profile, prompt, scoring, availability, voice, env status, admin key) | TESTED | `test_settings_validation`; UI screenshot |
 | Security: admin key, validation, upload limits, rate limit, CORS, cascade delete | TESTED | `test_admin_key…`, `test_rate_limit`, `test_upload_validation`, `test_delete_lead_cascades` |
-| Dark/light theme, responsive (390 / 820 / 1440 px) | VERIFIED | screenshots in `e2e/output/img` |
+| Kiln & Signal visual identity, monochrome theme, subtle motion and reduced-motion support | IMPLEMENTED | Updated shared CSS tokens, app shell, dashboard hero, page title, favicon and user-facing app labels; production build passes |
 | Docker compose | TESTED (configuration) | `docker compose config --quiet` passes; image build not run because Docker Desktop's engine was unavailable |
 | Google Calendar | NOT STARTED | Adapter seam only (by design) |
 | User accounts / multi-tenancy | NOT STARTED | Documented in SECURITY/SCALABILITY |
@@ -36,10 +36,13 @@ Functional MVP with demo mode and Gemini provider support. Gemini is configured 
 |---|---|
 | Backend pytest | **60 passed** (6 dependency/runtime deprecation warnings) |
 | Frontend `tsc -b` + `vite build` | **Passed** (Vite native-config compatibility warning) |
+| Frontend lint | **Passed with 5 warnings** (existing Fast Refresh/effect guidance) |
+| Local HTTP/browser smoke | **Not completed**; the sandbox blocked local socket access, and the browser safety layer could not identify the active URL |
 | Live Gemini generation | **Passed**, active model label confirmed without printing the key |
 | Live Gemini embedding + hybrid retrieval | **Passed** using an in-memory SQLite knowledge base; the persistent local database was not changed |
 | Docker Compose configuration | **Passed** with `docker compose config --quiet`; Docker Desktop could not start, so image build remains unverified |
 | Browser microphone | Not live-tested on this device; the browser UI, unsupported, and blocked-mic paths remain covered by the earlier browser checks |
+| Visual browser screenshot audit | Not completed; the Windows computer-use safety layer could not resolve the active browser URL |
 | Google Calendar | Not integrated; the local SQL database is the active calendar and the adapter interface is a seam only |
 
 ## Tests executed in the original verification cycle
@@ -65,15 +68,15 @@ Functional MVP with demo mode and Gemini provider support. Gemini is configured 
 10. Windows: `zoneinfo` needs `tzdata` → added to requirements.
 
 ## Current blockers
-- **Copy to PC:** no folder attached in this session. Minimum action: Claude desktop app → this chat → **+** → **Add folder** → `Desktop\Projects\SalesPilot-AI`. Or download the zip and unzip there.
-- Live microphone test needs a real browser on the PC.
+- Live microphone test needs a real browser and microphone on the target PC.
+- A screenshot-based visual audit should be completed in a normal browser session; the UI safety layer could not identify the active browser URL during this refresh.
 
 ## Next five priorities
-1. Run on the PC: `setup.ps1`, voice test in Chrome/Edge (en + hi), `npm run verify-mcp` for shadcn/Context7.
-2. Configure Gemini key or Ollama (`ollama pull llama3.2`) and review LLM answer quality/Hindi output.
-3. Alembic migrations + PostgreSQL option.
-4. Replace shared admin key with user accounts (roles).
-5. Streaming responses (SSE) to reduce voice latency; optional Whisper STT.
+1. Run the refreshed interface in Chrome/Edge at desktop and mobile widths; test English/Hindi speech on the target microphone.
+2. Backfill embeddings for existing knowledge chunks if hybrid search is desired throughout the sample KB.
+3. Add a Google Calendar adapter if an external calendar is required.
+4. Add Alembic migrations, PostgreSQL, authentication and tenant isolation before a production multi-user deployment.
+5. Consider streaming responses and dedicated STT/TTS if phone-line voice becomes a requirement.
 
 ## Technical decisions
 | Decision | Why |

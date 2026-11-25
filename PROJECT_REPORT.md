@@ -1,11 +1,11 @@
-# SalesPilot AI — Project Report
+# Kiln & Signal — Project Report
 
 **Date:** 26 November 2026  
-**Status:** Functional local MVP with Gemini and knowledge retrieval enabled
+**Status:** Functional local MVP; frontend rebranded as Kiln & Signal, Gemini and knowledge retrieval enabled
 
 ## Overview
 
-SalesPilot AI is a voice and text sales assistant for the fictional TechNova Academy. It helps prospective students learn about courses and policies, captures lead details, identifies sentiment and objections, scores leads, offers counselling appointments, and saves conversation summaries. Staff can review leads, calls, appointments, knowledge documents, and analytics in a web dashboard. Conversations support English and Hindi.
+Kiln & Signal is a voice and text sales assistant for the fictional TechNova Academy. It helps prospective students learn about courses and policies, captures lead details, identifies sentiment and objections, scores leads, offers counselling appointments, and saves conversation summaries. Staff can review leads, calls, appointments, knowledge documents, and analytics in a web dashboard. Conversations support English and Hindi.
 
 ## How it works
 
@@ -15,7 +15,7 @@ Voice input and playback use the browser Web Speech APIs. The Live Agent also su
 
 ## Technology
 
-- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, and chart/UI components.
+- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, and chart/UI components with a monochrome editorial visual system and subtle reduced-motion-aware background animation.
 - **Backend:** Python, FastAPI, Pydantic, SQLAlchemy, and SQLite.
 - **AI and retrieval:** Google Gemini, BM25 document search, Hindi query expansion/translation fallback, and optional embedding-based retrieval; demo templates remain available if no model is configured.
 - **Documents and operations:** PDF/TXT/Markdown knowledge uploads, CRM, analytics, and appointment management.

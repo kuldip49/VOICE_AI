@@ -1,6 +1,6 @@
-# SalesPilot AI
+# Kiln & Signal
 
-An AI sales voice agent for **TechNova Academy** (a fictional training company). A prospective student talks to the agent by voice or text in English or Hindi. The agent answers from the company's own documents, remembers what the caller said, scores the lead, books a counselling slot, and writes a call summary. Sales staff see everything in a CRM and analytics dashboard.
+A considered workspace for customer conversations, lead follow-through and counselling appointments. The demo is configured for fictional **TechNova Academy**; its sample knowledge, policies and dashboard data can be replaced for another business.
 
 > **Honest status:** the project runs offline in demo mode when no model is configured. This workspace has Gemini configured locally; public clones must add their own key in `backend/.env` to get model-written answers. See [project status and verification](#project-status-and-verification).
 
@@ -9,7 +9,7 @@ An AI sales voice agent for **TechNova Academy** (a fictional training company).
 Requirements: **Python 3.11+**, **Node.js 20+**, **Chrome or Edge** (for voice).
 
 ```powershell
-cd C:\path\to\SalesPilot-AI
+cd C:\path\to\VOICE_AI
 powershell -ExecutionPolicy Bypass -File .\setup.ps1      # venv, pip install, .env, database, npm install
 powershell -ExecutionPolicy Bypass -File .\start-all.ps1  # backend :8000 + frontend :5173, opens the browser
 ```
@@ -65,11 +65,12 @@ Full 5-minute script: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
 | Call summaries | `services/summary.py` |
 | Analytics from real rows (empty states when no data) | `routers/analytics.py`, `pages/Analytics.tsx` |
 | Settings: business profile, agent prompt, scoring weights, availability, voice, environment status | `routers/settings.py`, `pages/Settings.tsx` |
+| Monochrome client desk with editorial type, restrained ambient motion and reduced-motion support | `frontend/src/index.css`, `components/layout/AppShell.tsx` |
 
 ## Tests
 
 ```powershell
-.\run-tests.ps1                         # 58 backend tests + frontend type-check/build
+.\run-tests.ps1                         # backend tests + frontend type-check/build
 cd e2e; npm install; npm run verify-mcp # checks the 5 MCP servers
 npm run workflow                        # 20-step browser workflow via Playwright MCP (fresh DB)
 npm run audit                           # console/network/Lighthouse/perf via Chrome DevTools MCP
@@ -88,6 +89,7 @@ Every row below has a green check for a contribution that is present and evidenc
 | Area | In the project | Evidence checked | Scope and current limits |
 |---|---|---|---|
 | Text sales workflow: RAG, memory, scoring, sentiment, booking, CRM, summaries, analytics | ✅ Implemented | ✅ 60 backend tests pass; the 20-step browser workflow is recorded in [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md) | Demo mode remains available when no model key is configured. |
+| Kiln & Signal visual identity and monochrome interface | ✅ Implemented | ✅ TypeScript/Vite production build passes; lint has five recorded warnings | The native browser screenshot audit was unavailable in this Windows session; reduced-motion support is included. |
 | Gemini / Ollama answers | ✅ Both provider adapters are implemented | ✅ Gemini generation checked live; provider HTTP behavior is covered by mocked tests | Ollama was not run as a local service here. Gemini keys are local and are not in GitHub. |
 | Embedding hybrid retrieval | ✅ Optional hybrid ranking is implemented | ✅ Live Gemini embedding and hybrid retrieval checked against an in-memory knowledge base | Existing chunks without vectors use BM25 until embeddings are generated for them. |
 | Browser speech recognition and playback | ✅ Uses browser Web Speech APIs | ✅ Frontend production build passes; unsupported and blocked-microphone UI paths are covered by the recorded browser checks | A live microphone conversation still needs a Chrome/Edge check on the target device. |

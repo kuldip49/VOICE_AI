@@ -1,11 +1,11 @@
-# SalesPilot AI — Project Report
+# Kiln & Signal — Project Report
 
 **Report date:** 26 November 2026  
 **Project status:** Functional MVP; Gemini configured and currently active in this workspace
 
 ## Executive summary
 
-SalesPilot AI is a voice and text sales assistant for the fictional TechNova Academy. It answers prospective-student questions from the academy's knowledge base, gathers lead details, detects sentiment and objections, scores leads, offers counselling appointments, and records call summaries. Staff use the web dashboard to review leads, conversations, appointments, knowledge documents, and analytics.
+Kiln & Signal is a voice and text sales assistant for the fictional TechNova Academy. It answers prospective-student questions from the academy's knowledge base, gathers lead details, detects sentiment and objections, scores leads, offers counselling appointments, and records call summaries. Staff use the web dashboard to review leads, conversations, appointments, knowledge documents, and analytics.
 
 The project is designed to run locally in demo mode without an LLM key. In the current workspace, `LLM_PROVIDER=gemini` and the configured model is `gemini-3.5-flash-lite`. The key is kept in the ignored local file `backend/.env`; its value is intentionally not recorded here.
 
@@ -17,7 +17,7 @@ The main customer workflow is:
 
 1. Start a text or voice conversation in English or Hindi.
 2. Ask about courses, fees, schedules, policies, or other information in the knowledge base.
-3. Share details such as name, interests, budget, and timeline; SalesPilot updates the customer and lead record.
+3. Share details such as name, interests, budget, and timeline; Kiln & Signal updates the customer and lead record.
 4. Request a counselling appointment. The agent offers available slots and asks for explicit confirmation before booking.
 5. End the conversation to save a summary and suggested follow-up action.
 6. Review the lead, conversation, appointment, and analytics in the staff dashboard.
@@ -65,6 +65,8 @@ The React 19, TypeScript, and Vite app includes:
 - **Knowledge:** upload, inspect, search, and delete PDF, TXT, and Markdown documents.
 - **Analytics:** lead, sentiment, question, objection, product, and appointment metrics.
 - **Settings:** business profile, agent instructions, scoring weights, schedule, voice, provider status, and optional admin access.
+
+The product-facing name is **Kiln & Signal**. Its shared interface uses a warm black-and-white palette, an editorial serif for selected headings, restrained ambient motion, and reduced-motion support. The redesign changes frontend presentation and user-facing labels; the backend workflow and API remain unchanged.
 
 Voice input uses the browser Web Speech API (`en-IN` and `hi-IN`); speech playback uses browser speech synthesis. Speech recognition availability and Hindi voices depend on the browser and device. In Chrome, recognition may use an internet speech service. Text input remains available as a fallback.
 
@@ -123,7 +125,7 @@ FastAPI generates the interactive API reference at `/docs` when the backend is r
 - Public conversation endpoints have a per-process, in-memory rate limiter. A multi-worker deployment would need a shared limiter such as Redis.
 - Uploads are limited by `MAX_UPLOAD_MB` (5 MB by default) and restricted to PDF, TXT, and Markdown.
 - CORS origins are configurable. Error responses avoid returning stack traces.
-- Audio is handled by browser speech features; SalesPilot does not upload recorded call audio to its backend.
+- Audio is handled by browser speech features; Kiln & Signal does not upload recorded call audio to its backend.
 
 ## Running the project
 
@@ -134,7 +136,7 @@ For a standard Windows setup, the project documents:
 .\start-all.ps1
 ```
 
-The frontend is normally at `http://localhost:5173` and the backend at `http://127.0.0.1:8000`. In the current desktop session, ports 8000 and 8001 were already occupied by unrelated services, so SalesPilot was run with its backend on port 8002 and the Vite proxy pointed at that port. The current Live Agent URL is `http://127.0.0.1:5173/agent`.
+The frontend defaults to `http://localhost:5173` and the backend to `http://127.0.0.1:8000`. The development frontend proxies `/api` to the backend. The Live Agent route is `/agent`.
 
 ## Verification status
 
@@ -149,6 +151,8 @@ The frontend is normally at `http://localhost:5173` and the backend at `http://1
 
 - Backend suite: **60 passed**.
 - Frontend TypeScript check and production build: **passed**.
+- Frontend lint: **passed with five existing warnings**.
+- Frontend screenshot and local HTTP inspection: not completed in this Windows session; the browser-control safety layer could not identify the active URL, and the sandbox blocked local socket access.
 - Gemini generation and embedding requests: **passed** without exposing the API key.
 - Hybrid retrieval: **passed** against a temporary in-memory SQLite knowledge base; the stored project database was not changed.
 - Docker Compose configuration: **passed** `docker compose config --quiet`; an image build was not possible because Docker Desktop's engine was unavailable.

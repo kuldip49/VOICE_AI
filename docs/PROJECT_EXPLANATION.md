@@ -1,9 +1,9 @@
-# SalesPilot AI in plain language
+# Kiln & Signal in plain language
 
 ## The problem
 TechNova Academy gets enquiries at all hours. Sales staff answer the same questions (fees, batches, refunds) again and again, forget to note who was serious, and book counselling calls by back-and-forth messages. Leads go cold.
 
-## What SalesPilot does
+## What Kiln & Signal does
 It is a digital sales assistant called **Nova** that:
 
 1. **Talks** with a prospective student by voice or text, in English or Hindi.

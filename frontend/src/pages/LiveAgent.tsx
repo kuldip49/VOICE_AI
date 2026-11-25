@@ -229,7 +229,7 @@ export default function LiveAgent() {
   return (
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
       {/* Call column */}
-      <Panel className="flex h-[calc(100dvh-7.5rem)] min-h-[520px] flex-col overflow-hidden">
+      <Panel className="flex h-[calc(100dvh-9rem)] min-h-[520px] flex-col overflow-hidden">
         <div className="flex flex-wrap items-center gap-3 border-b px-4 py-3 sm:px-5">
           <div className="flex items-center gap-2.5">
             <span className={cn('size-2.5 rounded-full', live ? 'bg-live' : 'bg-input', voice.listening && 'animate-pulse')} aria-hidden />
@@ -320,7 +320,7 @@ export default function LiveAgent() {
       </Panel>
 
       {/* Live lead column */}
-      <div className="space-y-5 xl:max-h-[calc(100dvh-7.5rem)] xl:overflow-y-auto">
+      <div className="space-y-5 xl:max-h-[calc(100dvh-9rem)] xl:overflow-y-auto">
         <Panel>
           <PanelHeader title="Caller" description={customer?.id ? `Customer #${customer.id}` : 'Fills in as the caller shares details'} actions={lead && <CategoryBadge category={lead.category} />} />
           <dl className="grid grid-cols-[110px_1fr] gap-x-3 gap-y-2 px-5 py-4 text-[13px]">

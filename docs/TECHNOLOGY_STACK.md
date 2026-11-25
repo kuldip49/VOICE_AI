@@ -20,7 +20,7 @@
 | Tests | **pytest**, FastAPI TestClient; browser tests through **Playwright MCP** and **Chrome DevTools MCP** | | Cypress, Selenium |
 
 ## Component libraries vs MCP servers
-- **Component libraries** (shadcn/ui, Magic UI, Aceternity UI) are source code you copy into the app. SalesPilot uses the shadcn/ui pattern only; Magic UI/Aceternity were not needed because the brief asked for restrained, non-decorative UI.
+- **Component libraries** (shadcn/ui, Magic UI, Aceternity UI) are source code you copy into the app. Kiln & Signal uses the shadcn/ui pattern only, with a restrained monochrome visual system and a small amount of ambient motion rather than a decorative component library.
 - **MCP servers** are tools an AI coding assistant calls while building (search components, drive a browser, fetch docs, draw diagrams). They are not part of the running product. See [MCP_SETUP.md](MCP_SETUP.md).
 
 ## Why not a vector database in the MVP?

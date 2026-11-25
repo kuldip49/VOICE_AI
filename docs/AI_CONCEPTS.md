@@ -1,9 +1,9 @@
 # AI concepts, explained with this project
 
-Each section: simple idea first, then the technical term, then where it lives in SalesPilot.
+Each section: simple idea first, then the technical term, then where it lives in Kiln & Signal.
 
 ## Artificial intelligence (AI)
-Software that does tasks we normally think need human judgement: understanding language, deciding what to do next. SalesPilot mixes two kinds:
+Software that does tasks we normally think need human judgement: understanding language, deciding what to do next. Kiln & Signal mixes two kinds:
 - **Rule-based AI**: hand-written rules (e.g. "if the message contains *too expensive*, it is a price objection"). Predictable, cheap, testable.
 - **Machine-learned AI**: models trained on data (the LLM, Chrome's speech recogniser). Flexible, but can be wrong in surprising ways.
 Interview line: *"I used ML where flexibility matters (language understanding and generation) and rules where correctness matters (bookings, scoring)."*
@@ -40,7 +40,7 @@ Simple idea: *before answering, look it up in the company's documents, then answ
 **Not-found guard**: if the best score is below 3.0, or the question has a specific word that appears nowhere in the documents (e.g. "blockchain") and only generic words match ("course", "offer"), we answer "not in our knowledge base". Test it in Knowledge base → Test retrieval.
 
 ## Embeddings
-A list of numbers (a vector) that represents meaning. Sentences with similar meaning get vectors pointing in similar directions, even with different words ("fees" vs "cost"). Similarity is measured with **cosine similarity**. In SalesPilot, if a Gemini key is set, each chunk gets an embedding and retrieval blends cosine similarity with BM25 (**hybrid search**). Without a key we use BM25 plus a small synonym/Hindi dictionary (`rag.py → SYNONYMS`).
+A list of numbers (a vector) that represents meaning. Sentences with similar meaning get vectors pointing in similar directions, even with different words ("fees" vs "cost"). Similarity is measured with **cosine similarity**. In Kiln & Signal, if a Gemini key is set, each chunk gets an embedding and retrieval blends cosine similarity with BM25 (**hybrid search**). Without a key we use BM25 plus a small synonym/Hindi dictionary (`rag.py → SYNONYMS`).
 
 ## Vector search
 Finding the vectors closest to the question's vector. For thousands of chunks you use an index (HNSW) in a vector database (pgvector, Qdrant, FAISS). Our MVP compares against every chunk because there are only ~25.
@@ -57,7 +57,7 @@ Finding the vectors closest to the question's vector. For thousands of chunks yo
 A program that decides *which actions to take* toward a goal, uses tools, observes results, then responds. Ours: goal = help the customer and qualify the lead; tools = 10 functions; planner = intent rules; memory = DB. It is an agent, not a chatbot, because it acts (books, updates CRM, scores) and every action is logged.
 
 ## Function calling / tool use
-Letting an AI call code with structured arguments. In SalesPilot each tool has a Pydantic schema (like a JSON Schema). `execute_tool()` validates arguments, checks the tool is permitted, runs it, and logs input/output/duration. Today the planner picks tools; with Gemini function calling the model could pick them, and the same validation layer would still protect the database.
+Letting an AI call code with structured arguments. In Kiln & Signal each tool has a Pydantic schema (like a JSON Schema). `execute_tool()` validates arguments, checks the tool is permitted, runs it, and logs input/output/duration. Today the planner picks tools; with Gemini function calling the model could pick them, and the same validation layer would still protect the database.
 
 ## Sentiment analysis
 Classifying feelings in text: positive, neutral, negative, frustrated, interested, hesitant. Ours is lexicon-based (lists of cue phrases in English/Hindi/Hinglish), with a priority order and a confidence that drops when signals are mixed. It also detects **objections** (price, time, uncertainty, trust, authority) and suggests an action. Sentiment is not intent: "Thanks, but I'm not interested" is polite yet negative for sales.

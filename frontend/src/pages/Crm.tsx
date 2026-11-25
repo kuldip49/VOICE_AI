@@ -165,7 +165,7 @@ export default function Crm() {
     try {
       const blob = await api.exportCsv()
       const url = URL.createObjectURL(blob)
-      const a = Object.assign(document.createElement('a'), { href: url, download: 'salespilot-leads.csv' })
+      const a = Object.assign(document.createElement('a'), { href: url, download: 'kiln-signal-leads.csv' })
       a.click()
       URL.revokeObjectURL(url)
     } catch (e) { toast.error(e instanceof Error ? e.message : 'Export failed') }

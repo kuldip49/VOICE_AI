@@ -21,14 +21,17 @@ export const NAV = [
 
 function Logo() {
   return (
-    <div className="flex items-center gap-2.5 px-2">
-      <svg viewBox="0 0 32 32" className="size-7" aria-hidden>
-        <rect width="32" height="32" rx="8" className="fill-primary" />
-        <path d="M8 18c2.5 0 2.5-6 5-6s2.5 10 5 10 2.5-8 6-8" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" />
-      </svg>
-      <div className="leading-tight">
-        <div className="text-[15px] font-semibold tracking-tight">SalesPilot</div>
-        <div className="text-[11px] text-muted-foreground">TechNova Academy</div>
+    <div className="flex items-center gap-3 px-2">
+      <span className="brand-mark" aria-hidden>
+        <svg viewBox="0 0 40 40" className="size-7" fill="none">
+          <path d="M9 26.5c4.8 0 6.2-13 11-13s6.2 13 11 13" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+          <path d="M12 30.5h16M15 9.5h10" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity=".62" />
+          <circle cx="20" cy="13.5" r="1.5" fill="currentColor" />
+        </svg>
+      </span>
+      <div className="min-w-0 leading-tight">
+        <div className="editorial text-[18px] font-semibold tracking-[-.04em]">Kiln &amp; Signal</div>
+        <div className="mt-1 text-[9px] font-medium uppercase tracking-[.2em] text-muted-foreground">Client desk</div>
       </div>
     </div>
   )
@@ -36,12 +39,12 @@ function Logo() {
 
 function NavItems({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <nav className="flex flex-col gap-0.5" aria-label="Main">
+    <nav className="workspace-nav flex flex-col gap-1" aria-label="Main">
       {NAV.map(({ to, label, icon: Icon }) => (
         <NavLink key={to} to={to} end={to === '/'} onClick={onNavigate}
-          className={({ isActive }) => cn('flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground',
-            isActive && 'bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground')}>
-          <Icon className="size-4" aria-hidden /> {label}
+          className={({ isActive }) => cn('flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[13px] font-medium text-muted-foreground hover:bg-muted/80 hover:text-foreground',
+            isActive && 'bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground')}>
+          <Icon className="size-[17px] opacity-80" strokeWidth={1.7} aria-hidden /> {label}
         </NavLink>
       ))}
     </nav>
@@ -56,38 +59,51 @@ export function AppShell() {
   const title = NAV.find((n) => (n.to === '/' ? loc.pathname === '/' : loc.pathname.startsWith(n.to)))?.label ?? ''
 
   return (
-    <div className="min-h-dvh lg:grid lg:grid-cols-[232px_1fr]">
-      <aside className="sticky top-0 hidden h-dvh flex-col gap-6 border-r bg-sidebar px-3 py-5 lg:flex">
+    <div className="min-h-dvh lg:grid lg:grid-cols-[258px_minmax(0,1fr)]">
+      <aside className="sidebar-shell sticky top-0 hidden h-dvh flex-col gap-7 border-r bg-sidebar px-4 py-6 lg:flex">
         <Logo />
         <NavItems />
-        <div className="mt-auto space-y-2 px-2 text-[12px] text-muted-foreground">
-          <p>Answers come only from your knowledge base.</p>
+        <div className="mt-auto space-y-3 px-2">
+          <div className="border-t pt-4">
+            <p className="text-[9px] font-semibold uppercase tracking-[.2em] text-muted-foreground">A thoughtful follow-through</p>
+            <p className="mt-2 max-w-[190px] text-[12px] leading-relaxed text-muted-foreground">Keep the important details close, from first hello to next step.</p>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+            <span className="size-1.5 rounded-full bg-ok" aria-hidden /> Private workspace
+          </div>
         </div>
       </aside>
 
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
           <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 flex w-64 flex-col gap-6 bg-sidebar px-3 py-5 shadow-xl">
+          <div className="absolute inset-y-0 left-0 flex w-[278px] flex-col gap-7 border-r bg-sidebar px-4 py-6 shadow-2xl">
             <div className="flex items-center justify-between"><Logo /><Button variant="ghost" size="icon" aria-label="Close menu" onClick={() => setOpen(false)}><X /></Button></div>
             <NavItems onNavigate={() => setOpen(false)} />
+            <div className="mt-auto border-t px-2 pt-4 text-[12px] leading-relaxed text-muted-foreground">A thoughtful follow-through, from first hello to next step.</div>
           </div>
         </div>
       )}
 
       <div className="min-w-0">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/90 px-4 backdrop-blur sm:px-6">
+        <header className="topbar sticky top-0 z-30 flex min-h-[76px] items-center gap-4 border-b px-4 sm:px-7 lg:px-10">
           <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu" onClick={() => setOpen(true)}><Menu /></Button>
-          <h1 className="text-[17px] font-semibold tracking-tight">{title}</h1>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="min-w-0">
+            <p className="mb-0.5 text-[9px] font-semibold uppercase tracking-[.2em] text-muted-foreground">Workspace <span className="px-1 opacity-50">/</span> Operations</p>
+            <h1 className="editorial truncate text-[21px] font-medium leading-tight tracking-[-.025em]">{title}</h1>
+          </div>
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
             {pub.error ? <span className="text-xs text-destructive">Backend offline</span> : <ProviderBadge provider={pub.data?.provider} />}
-            <Button variant="ghost" size="icon" onClick={toggle} aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}>
+            <span className="hidden h-7 w-px bg-border sm:block" aria-hidden />
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={toggle} aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}>
               {theme === 'dark' ? <Sun /> : <Moon />}
             </Button>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6">
-          <Suspense fallback={<Loading />}><Outlet /></Suspense>
+        <main className="mx-auto w-full max-w-[1540px] px-4 py-6 sm:px-7 sm:py-8 lg:px-10">
+          <div key={loc.pathname} className="page-stage">
+            <Suspense fallback={<Loading />}><Outlet /></Suspense>
+          </div>
         </main>
       </div>
     </div>

@@ -1,32 +1,25 @@
-# React + TypeScript + Vite
+# Kiln & Signal — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The frontend is the browser workspace for conversations, leads, appointments, the knowledge base, analytics and business settings. It is built with React, TypeScript, Vite and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Run it
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+From the repository root, install packages once:
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```powershell
+cd frontend
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+The Vite server serves the app at `http://localhost:5173` and forwards `/api` requests to the FastAPI service at `http://127.0.0.1:8000`. Start the backend in a separate PowerShell window with `..\start-backend.ps1` from the repository root.
+
+## Useful commands
+
+```powershell
+npm run build  # TypeScript check and production build
+npm run lint   # Oxlint
+npm run preview # Preview the production build locally
+```
+
+The visual system is defined in `src/index.css`; the shared navigation and workspace shell are in `src/components/layout/AppShell.tsx`. Feature pages live in `src/pages/`, and API calls are typed in `src/lib/api.ts`.

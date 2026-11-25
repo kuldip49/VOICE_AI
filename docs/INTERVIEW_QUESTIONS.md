@@ -4,7 +4,7 @@ Answers reference real files so you can open the code while practising. ⚠️ m
 
 ## A. Project and architecture
 **1. Explain the project in 30 seconds.**
-SalesPilot is an AI sales agent for a training company. Customers talk to it by voice or text in English or Hindi; it answers from the company's documents using RAG, remembers their details, scores the lead 0-100 with reasons, books counselling slots without double booking, and writes a call summary. Staff use a CRM and analytics dashboard built on the same database.
+Kiln & Signal is an AI sales agent for a training company. Customers talk to it by voice or text in English or Hindi; it answers from the company's documents using RAG, remembers their details, scores the lead 0-100 with reasons, books counselling slots without double booking, and writes a call summary. Staff use a CRM and analytics dashboard built on the same database.
 
 **2. Draw the architecture.**
 React (Vite) in the browser with Web Speech for STT/TTS → REST JSON → FastAPI → agent orchestrator → 10 tools → services (RAG, scoring, sentiment, scheduling, summary) → SQLite via SQLAlchemy. Optional LLM (Gemini/Ollama) only writes answer text. See `docs/SYSTEM_ARCHITECTURE.md`.
@@ -40,7 +40,7 @@ Every assistant message stores `generated_by` (`demo-rules`, `gemini:model`, `ol
 
 **14. How does the frontend reach the backend without CORS issues in dev?** Vite proxies `/api` to port 8000. CORS is still configured for other origins.
 
-**15. How do you handle loading, empty and error states?** `useApi` returns `loading/error/data`; pages render `Loading`, `Empty` (with an action, e.g. "Start a call") or `ErrorState` with "Try again". Backend offline shows "Cannot reach the SalesPilot backend…" (verified in browser).
+**15. How do you handle loading, empty and error states?** `useApi` returns `loading/error/data`; pages render `Loading`, `Empty` (with an action, e.g. "Start a call") or `ErrorState` with "Try again". Backend offline shows "Cannot reach the Kiln & Signal backend…" (verified in browser).
 
 **16. Why shadcn/ui?** It's copy-in source built on Radix (accessible dialogs, selects, tabs), so I own and can style the code; not a black-box dependency.
 

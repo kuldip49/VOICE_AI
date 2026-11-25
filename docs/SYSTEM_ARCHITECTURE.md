@@ -39,7 +39,7 @@ flowchart LR
 - `src/hooks/useVoice.ts`: STT, TTS, microphone level meter, error mapping, barge-in.
 
 ### Voice pipeline
-1. `SpeechRecognition` (lang `en-IN` or `hi-IN`) produces interim + final text. In Chrome the audio is sent to Google's speech service, so it needs internet; nothing is stored by SalesPilot.
+1. `SpeechRecognition` (lang `en-IN` or `hi-IN`) produces interim + final text. In Chrome the audio is sent to Google's speech service, so it needs internet; nothing is stored by Kiln & Signal.
 2. Final text is POSTed to `/api/conversations/{id}/messages` with `channel=voice`.
 3. The reply is read with `speechSynthesis` using a voice that matches the reply language.
 4. Hands-free mode loops listen → send → speak. Clicking the mic while the agent speaks cancels speech (barge-in).

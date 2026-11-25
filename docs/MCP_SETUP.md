@@ -1,4 +1,4 @@
-# MCP servers used to build and verify SalesPilot
+# MCP servers used to build and verify Kiln & Signal
 
 All five are free and open source. None needs a paid key. They are **developer tools** for an AI coding assistant; the running product does not depend on them.
 

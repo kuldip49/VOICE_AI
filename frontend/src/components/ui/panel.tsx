@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils'
 
 /** A bordered surface. Used for primary groupings only — not every list item becomes a card. */
 export function Panel({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <section className={cn('rounded-lg border bg-card', className)} {...props} />
+  return <section className={cn('surface-panel rounded-lg border bg-card', className)} {...props} />
 }
 
 export function PanelHeader({ title, description, actions, className }: { title: React.ReactNode; description?: React.ReactNode; actions?: React.ReactNode; className?: string }) {

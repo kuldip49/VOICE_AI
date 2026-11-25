@@ -1,7 +1,7 @@
 # Demo script
 
 ## 30-second introduction
-"SalesPilot is an AI sales agent for a training company. A prospective student talks to it by voice in English or Hindi. It answers only from the company's own documents, remembers who you are, scores how likely you are to buy with a reason for every point, books a counselling call without double booking, and writes a summary for the sales team. It runs fully free and offline in demo mode, and plugs into Gemini or a local model for natural answers."
+"Kiln & Signal is a considered customer-conversation desk for a training company. A prospective student talks to it by voice or text in English or Hindi. It answers from the company's documents, remembers the student's needs, scores the lead with a reason for each point, books a counselling call after confirmation, and gives the sales team a clear follow-up summary. The workspace has a quiet monochrome design; Gemini or a local model can write grounded answers."
 
 ## Before the demo (5 minutes earlier)
 1. `.\reset-demo-data.ps1` (fresh DB), then `.\start-all.ps1`.
@@ -25,7 +25,7 @@
 | 3:55 | **Appointments + Analytics** | Booking in the week view; charts from real rows |
 | 4:15 | **Hindi** (optional): switch to हिन्दी, new call, *"रिफंड की नीति क्या है?"* | |
 | 4:30 | **Commercial + scale.** "Subscription plus usage; LLM cost is under a rupee per conversation with browser voice. For 100k users: stateless API pods, Postgres, Redis, vector DB, streaming voice; designed, not load-tested." | |
-| 4:50 | **Close.** "Everything you saw is stored data; 58 backend tests and a 20-step browser test pass." | |
+| 4:50 | **Close.** "Everything you saw is stored data; 60 backend tests and a 20-step browser workflow are recorded as passing." | |
 
 ## Likely questions during the demo
 - "Is that a real AI answer?" → Point at the badge "Template answer (no LLM)" or "Written by gemini:…".

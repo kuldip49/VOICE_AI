@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react'
 
 type Theme = 'light' | 'dark'
-const KEY = 'salespilot.theme'
+const KEY = 'kiln-signal.theme'
+const LEGACY_KEY = 'salespilot.theme'
 
 function initial(): Theme {
   try {
     const saved = localStorage.getItem(KEY)
     if (saved === 'light' || saved === 'dark') return saved
+    const legacy = localStorage.getItem(LEGACY_KEY)
+    if (legacy === 'light' || legacy === 'dark') {
+      localStorage.setItem(KEY, legacy)
+      return legacy
+    }
   } catch { /* ignore */ }
   return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }

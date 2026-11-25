@@ -74,13 +74,13 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   try {
     res = await fetch(`/api${path}`, { ...init, headers })
   } catch {
-    throw new ApiError(0, 'Cannot reach the SalesPilot backend. Start it with start-backend.ps1 (port 8000).')
+    throw new ApiError(0, 'Cannot reach the Kiln & Signal service. Start it with start-backend.ps1 (port 8000).')
   }
   if (!res.ok) {
     let msg = `HTTP ${res.status}`
     try { msg = detailToText((await res.json()).detail) } catch { /* not json */ }
     if (res.status === 401) msg = 'Admin key required. Enter it in Settings → Access.'
-    if (res.status === 502 || res.status === 504) msg = 'Cannot reach the SalesPilot backend. Start it with start-backend.ps1 (port 8000).'
+    if (res.status === 502 || res.status === 504) msg = 'Cannot reach the Kiln & Signal service. Start it with start-backend.ps1 (port 8000).'
     throw new ApiError(res.status, msg)
   }
   const type = res.headers.get('content-type') ?? ''

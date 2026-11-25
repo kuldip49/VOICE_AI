@@ -1,4 +1,4 @@
-import { CalendarClock, MessagesSquare, PhoneCall, Users } from 'lucide-react'
+import { ArrowUpRight, CalendarClock, MessagesSquare, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { TrendChart } from '@/components/charts'
 import { CategoryBadge, ScoreMeter } from '@/components/domain'
@@ -30,17 +30,33 @@ export default function Overview() {
   const noData = t.engaged_conversations === 0
 
   return (
-    <div className="space-y-5">
-      {noData && (
-        <Panel className="flex flex-wrap items-center gap-4 border-primary/30 bg-accent/40 px-5 py-4">
-          <PhoneCall className="size-5 text-primary" />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium">No conversations yet</p>
-            <p className="text-[13px] text-muted-foreground">Every number on this page comes from stored conversations. Run a call with the agent to see them fill in.</p>
+    <div className="space-y-6">
+      <section className="desk-hero">
+        <div className="hero-orbit" aria-hidden>
+          <span className="hero-orbit__satellite" />
+          <span className="hero-orbit__core">K</span>
+        </div>
+        <div className="relative z-10 flex min-h-[15.2rem] max-w-[790px] flex-col items-start justify-center px-6 py-7 sm:px-9 sm:py-8">
+          <p className="mb-4 flex items-center gap-2 text-[9px] font-medium uppercase tracking-[.22em] text-primary-foreground/65">
+            <span className="size-1.5 rounded-full bg-primary-foreground/70" aria-hidden />
+            KILN &amp; SIGNAL <span className="opacity-40">/</span> THE DAILY DESK
+          </p>
+          <h2 className="editorial max-w-[700px] text-[35px] font-normal leading-[1.02] tracking-[-.035em] sm:text-[48px]">
+            Keep every <span className="italic">good conversation</span> moving.
+          </h2>
+          <p className="mt-3 max-w-[470px] text-[13px] leading-relaxed text-primary-foreground/70 sm:text-[14px]">
+            A clear view of what your team heard, what each lead needs, and what comes next.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
+            <Button asChild className="h-10 rounded-full bg-primary-foreground px-4 text-primary shadow-sm hover:bg-primary-foreground/90">
+              <Link to="/agent">Open the conversation desk <ArrowUpRight className="size-4" /></Link>
+            </Button>
+            <span className="text-[11px] text-primary-foreground/60">
+              {noData ? 'Ready for your first conversation' : `${t.engaged_conversations} conversations in the last 14 days`}
+            </span>
           </div>
-          <Button asChild><Link to="/agent">Start a call</Link></Button>
-        </Panel>
-      )}
+        </div>
+      </section>
 
       <Panel className="grid grid-cols-2 divide-x divide-y sm:grid-cols-3 lg:grid-cols-6 lg:divide-y-0 [&>*]:border-border">
         <Stat label="Conversations" value={t.engaged_conversations} hint={`${t.conversations} session${t.conversations === 1 ? '' : 's'} opened`} />

@@ -6,7 +6,7 @@ All numbers here are **illustrative estimates with stated assumptions**. No mark
 Small and mid-sized businesses whose sales start with many similar enquiries: training institutes and ed-tech (like TechNova), coaching centres, real-estate developers, clinics, travel agencies, B2B SaaS with inbound demos.
 
 ## Problem and value proposition
-| Pain | SalesPilot answer |
+| Pain | Kiln & Signal answer |
 |---|---|
 | Enquiries after hours go unanswered | 24/7 agent by voice or chat |
 | Reps repeat the same answers | Grounded answers from the company's own documents |
