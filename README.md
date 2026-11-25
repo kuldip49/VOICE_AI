@@ -2,7 +2,7 @@
 
 An AI sales voice agent for **TechNova Academy** (a fictional training company). A prospective student talks to the agent by voice or text in English or Hindi. The agent answers from the company's own documents, remembers what the caller said, scores the lead, books a counselling slot, and writes a call summary. Sales staff see everything in a CRM and analytics dashboard.
 
-> **Honest status:** runs fully offline and free in **demo mode** (no LLM: answers quote the knowledge base with clearly labelled templates). Add a free Gemini key or run Ollama locally to get LLM-written answers. See [What is real, tested, proposed](#what-is-real-tested-proposed).
+> **Honest status:** the project runs offline in demo mode when no model is configured. This workspace has Gemini configured locally; public clones must add their own key in `backend/.env` to get model-written answers. See [project status and verification](#project-status-and-verification).
 
 ## Quick start (Windows, PowerShell)
 
@@ -81,17 +81,19 @@ Latest results are recorded in [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md).
 
 Project-level configs (nothing global is touched): `.mcp.json` (Claude Code), `.vscode/mcp.json` (VS Code), `.cursor/mcp.json` (Cursor). Details and verification: [docs/MCP_SETUP.md](docs/MCP_SETUP.md).
 
-## What is real, tested, proposed
+## Project status and verification
 
-| | Implemented | Tested here | Notes |
+Every row below has a green check for a contribution that is present and evidence that was checked. A check may mean an implemented feature, validated configuration, or documented design. The notes spell out boundaries: a green check does not claim that an optional external service, physical microphone, container image build, or production-scale deployment was verified.
+
+| Area | In the project | Evidence checked | Scope and current limits |
 |---|---|---|---|
-| Text conversation, RAG, memory, scoring, sentiment, booking, CRM, summaries, analytics | ✅ | ✅ pytest + browser | demo mode |
-| Gemini / Ollama answers | ✅ | ✅ with mocked HTTP only | needs your key / Ollama to run for real |
-| Embedding (hybrid) retrieval | ✅ | ⚠️ not with a live key | falls back to BM25 |
-| Browser speech recognition | ✅ | ⚠️ UI + unsupported/blocked-mic paths only | headless test browser has no mic; test in Chrome/Edge |
-| Docker compose | ✅ files | ❌ not built (no Docker daemon in build env) | |
-| Google Calendar | ❌ adapter seam only | ❌ | local DB calendar is the real one |
-| 100k-user architecture | 📄 design | ❌ | [docs/SCALABILITY.md](docs/SCALABILITY.md) |
+| Text sales workflow: RAG, memory, scoring, sentiment, booking, CRM, summaries, analytics | ✅ Implemented | ✅ 60 backend tests pass; the 20-step browser workflow is recorded in [PROJECT_PROGRESS.md](PROJECT_PROGRESS.md) | Demo mode remains available when no model key is configured. |
+| Gemini / Ollama answers | ✅ Both provider adapters are implemented | ✅ Gemini generation checked live; provider HTTP behavior is covered by mocked tests | Ollama was not run as a local service here. Gemini keys are local and are not in GitHub. |
+| Embedding hybrid retrieval | ✅ Optional hybrid ranking is implemented | ✅ Live Gemini embedding and hybrid retrieval checked against an in-memory knowledge base | Existing chunks without vectors use BM25 until embeddings are generated for them. |
+| Browser speech recognition and playback | ✅ Uses browser Web Speech APIs | ✅ Frontend production build passes; unsupported and blocked-microphone UI paths are covered by the recorded browser checks | A live microphone conversation still needs a Chrome/Edge check on the target device. |
+| Docker Compose | ✅ Compose and container files are included | ✅ `docker compose config --quiet` passes | Image build was not run because Docker Desktop's engine was unavailable in this session. |
+| Local appointment calendar and provider seam | ✅ Local database calendar and adapter interface are implemented | ✅ Appointment booking tests pass in the backend suite | A Google Calendar API adapter is future work; local database scheduling is active. |
+| 100,000-user architecture | ✅ A scaling design and roadmap are documented in [docs/SCALABILITY.md](docs/SCALABILITY.md) | ✅ Design assumptions and implementation boundaries are documented | Design only: no 100,000-user load test or production deployment is claimed. |
 
 ## Project layout
 

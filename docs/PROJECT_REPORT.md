@@ -145,16 +145,23 @@ The frontend is normally at `http://localhost:5173` and the backend at `http://1
 - The exact Hindi fee question was retrieved from the sample knowledge base and answered by Gemini in an isolated in-memory agent run.
 - The live backend health endpoint and frontend API proxy both reported `gemini:gemini-3.5-flash-lite`.
 
-### Recorded by the project progress file
+### Verification refresh on 26 November 2026
 
-`PROJECT_PROGRESS.md` records 58 passing backend tests, a passing frontend type-check/build, a 20-step browser workflow, and browser audit results. The full suite was not rerun after the latest Gemini/RAG and call-ending changes.
+- Backend suite: **60 passed**.
+- Frontend TypeScript check and production build: **passed**.
+- Gemini generation and embedding requests: **passed** without exposing the API key.
+- Hybrid retrieval: **passed** against a temporary in-memory SQLite knowledge base; the stored project database was not changed.
+- Docker Compose configuration: **passed** `docker compose config --quiet`; an image build was not possible because Docker Desktop's engine was unavailable.
+
+`PROJECT_PROGRESS.md` also records the earlier 20-step browser workflow and browser audit. That browser workflow was not rerun during this verification refresh.
 
 ### Not verified here
 
 - Real microphone capture and Hindi speech recognition on the user's PC.
 - End-to-end live voice use after the automatic hang-up change.
-- Live Google Calendar or external CRM integrations.
-- Docker image build in an environment with Docker available.
+- Google Calendar API integration (the active calendar remains the local database).
+- Docker image build in an environment with a working Docker engine.
+- Load or deployment behavior at 100,000 users; the scalability document is a design, not a scale test.
 
 ## Known limitations and recommended next steps
 

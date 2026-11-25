@@ -1,9 +1,9 @@
 # PROJECT_PROGRESS
 
-Last update: 2026-11-25 (cycle 1). Statuses: NOT STARTED · IN PROGRESS · BLOCKED · IMPLEMENTED · TESTED · VERIFIED (= tested + checked in a real browser).
+Last update: 2026-11-26 (verification refresh). Statuses: NOT STARTED · IN PROGRESS · BLOCKED · IMPLEMENTED · TESTED · VERIFIED (= tested + checked in a real browser).
 
 ## Current status
-Functional MVP complete in demo mode. Main business workflow passes in automated API tests and in a real browser. Built in a cloud sandbox because no existing project code was available; it must be copied to the user's PC (blocked until a folder is attached in the Claude desktop app).
+Functional MVP with demo mode and Gemini provider support. Gemini is configured in the local ignored `backend/.env`; no API key is stored in this repository. Main business workflow passes in the backend suite, and the earlier real-browser workflow is recorded below.
 
 ## Features
 | Feature | Status | Evidence |
@@ -13,8 +13,8 @@ Functional MVP complete in demo mode. Main business workflow passes in automated
 | English + Hindi | VERIFIED (text) | `test_hindi_workflow`, browser step 7 |
 | Contextual + persistent memory, context window | TESTED | `test_contextual_memory…`, `test_persistent_memory…`, `test_context_window_rolls_summary` |
 | RAG: upload PDF/TXT, chunk, BM25, sources, not-found guard | VERIFIED | `tests/test_rag.py` (9), Knowledge page step |
-| Embedding hybrid retrieval | IMPLEMENTED | Needs Gemini key; not run live |
-| LLM providers (Gemini, Ollama) + fallback | TESTED (mocked HTTP) | `test_gemini_provider…`, `test_llm_failure…` |
+| Embedding hybrid retrieval | TESTED (live smoke check) | Live Gemini embedding + hybrid RAG retrieval against an in-memory knowledge base; stored chunks without embeddings continue to use BM25 |
+| LLM providers (Gemini, Ollama) + fallback | TESTED | Gemini generation checked live; Ollama/provider HTTP behavior tested with mocks |
 | Lead extraction + scoring with reasons | VERIFIED | unit tests + Caller/Score panels |
 | Sentiment + objections + recommended action | VERIFIED | unit tests + browser step 5 |
 | Appointments: slots, confirm, book, duplicate prevention, cancel, reschedule | VERIFIED | `tests/test_appointments.py` (9), browser step 8 |
@@ -24,13 +24,25 @@ Functional MVP complete in demo mode. Main business workflow passes in automated
 | Settings (business profile, prompt, scoring, availability, voice, env status, admin key) | TESTED | `test_settings_validation`; UI screenshot |
 | Security: admin key, validation, upload limits, rate limit, CORS, cascade delete | TESTED | `test_admin_key…`, `test_rate_limit`, `test_upload_validation`, `test_delete_lead_cascades` |
 | Dark/light theme, responsive (390 / 820 / 1440 px) | VERIFIED | screenshots in `e2e/output/img` |
-| Docker compose | IMPLEMENTED | Not built: no Docker daemon in build environment |
+| Docker compose | TESTED (configuration) | `docker compose config --quiet` passes; image build not run because Docker Desktop's engine was unavailable |
 | Google Calendar | NOT STARTED | Adapter seam only (by design) |
 | User accounts / multi-tenancy | NOT STARTED | Documented in SECURITY/SCALABILITY |
 | Alembic migrations | NOT STARTED | `create_all` used |
 | Docs (11 files + diagrams + cost model) | IMPLEMENTED | `docs/` |
 
-## Tests executed (this cycle)
+## Verification refresh (2026-11-26)
+
+| Check | Result |
+|---|---|
+| Backend pytest | **60 passed** (6 dependency/runtime deprecation warnings) |
+| Frontend `tsc -b` + `vite build` | **Passed** (Vite native-config compatibility warning) |
+| Live Gemini generation | **Passed**, active model label confirmed without printing the key |
+| Live Gemini embedding + hybrid retrieval | **Passed** using an in-memory SQLite knowledge base; the persistent local database was not changed |
+| Docker Compose configuration | **Passed** with `docker compose config --quiet`; Docker Desktop could not start, so image build remains unverified |
+| Browser microphone | Not live-tested on this device; the browser UI, unsupported, and blocked-mic paths remain covered by the earlier browser checks |
+| Google Calendar | Not integrated; the local SQL database is the active calendar and the adapter interface is a seam only |
+
+## Tests executed in the original verification cycle
 | Suite | Result |
 |---|---|
 | Backend pytest (unit, API integration, E2E-API workflow, Hindi, memory, RAG, booking, CRM, security, LLM mocks) | **58 passed** |
