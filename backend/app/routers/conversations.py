@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from .. import serializers as ser
 from ..agent.orchestrator import T, SalesAgent
 from ..agent.tools import ToolContext, execute_tool
+from ..config import get_settings
 from ..database import get_db
 from ..models import AgentToolLog, Conversation, Customer, Lead, Message
 from ..security import rate_limit, require_admin
@@ -29,47 +30,50 @@ class MessageIn(BaseModel):
     channel: str | None = Field(default=None, pattern=r"^(text|voice)$")
 
 
-def _embed_fn():
-    p = get_provider()
-    return getattr(p, "embed", None) if p else None
+def open_conversation(db: Session, language: str, channel: str = "text", customer_id: int | None = None) -> Conversation:
+    """Create a conversation and its stored greeting; shared by web and phone channels."""
+    if customer_id:
+        customer = db.get(Customer, customer_id)
+        if not customer:
+            raise HTTPException(404, "Unknown customer")
+    else:
+        customer = Customer(language=language)
+        customer.lead = Lead()
+        db.add(customer)
+        db.flush()
+    if not customer.lead:
+        customer.lead = Lead()
+        db.flush()
+    conv = Conversation(customer_id=customer.id, channel=channel, language=language, state={})
+    db.add(conv)
+    db.flush()
+    prof = get_setting(db, "business_profile")
+    greet = T["greet"][language].format(agent=prof["agent_name"], company=prof["company_name"])
+    if customer.name:
+        greet = greet.replace("!", f", {customer.name}!", 1) if language == "en" else greet
+    db.add(Message(conversation_id=conv.id, role="assistant", content=greet, language=language,
+                   intents=["greeting"], generated_by="demo-rules"))
+    db.commit()
+    db.refresh(conv)
+    return conv
 
 
 @router.post("", dependencies=[Depends(rate_limit)])
 def start_conversation(body: StartIn, db: Session = Depends(get_db)):
-    if body.customer_id:
-        customer = db.get(Customer, body.customer_id)
-        if not customer:
-            raise HTTPException(404, "Unknown customer")
-    else:
-        customer = Customer(language=body.language)
-        customer.lead = Lead()
-        db.add(customer)
-        db.flush()
-    conv = Conversation(customer_id=customer.id, channel=body.channel, language=body.language, state={})
-    db.add(conv)
-    db.flush()
-    prof = get_setting(db, "business_profile")
-    greet = T["greet"][body.language].format(agent=prof["agent_name"], company=prof["company_name"])
-    if customer.name:
-        greet = greet.replace("!", f", {customer.name}!", 1) if body.language == "en" else greet
-    db.add(Message(conversation_id=conv.id, role="assistant", content=greet, language=body.language,
-                   intents=["greeting"], generated_by="demo-rules"))
-    db.commit()
-    db.refresh(conv)
+    conv = open_conversation(db, body.language, body.channel, body.customer_id)
     return ser.conversation(conv, with_messages=True)
 
 
-@router.post("/{conversation_id}/messages", dependencies=[Depends(rate_limit)])
-def send_message(conversation_id: str, body: MessageIn, db: Session = Depends(get_db)):
-    conv = db.get(Conversation, conversation_id)
-    if not conv:
-        raise HTTPException(404, "Conversation not found")
+def process_message(db: Session, conv: Conversation, text: str, llm_timeout_seconds: float | None = None):
+    """Run the existing sales agent for one typed or transcribed caller turn."""
     if conv.status != "active":
         raise HTTPException(409, "Conversation has ended")
-    if body.channel and body.channel != conv.channel and body.channel == "voice":
-        conv.channel = "voice"
-    agent = SalesAgent(db, conv, embed_fn=_embed_fn())
-    user_msg, bot_msg, res = agent.handle(body.text.strip())
+    provider_settings = get_settings()
+    if llm_timeout_seconds is not None:
+        provider_settings = provider_settings.model_copy(update={"llm_timeout_seconds": llm_timeout_seconds})
+    provider = get_provider(provider_settings)
+    agent = SalesAgent(db, conv, embed_fn=getattr(provider, "embed", None) if provider else None, provider=provider)
+    user_msg, bot_msg, res = agent.handle(text.strip())
     db.refresh(conv)
     return {
         "conversation": ser.conversation(conv),
@@ -80,6 +84,16 @@ def send_message(conversation_id: str, body: MessageIn, db: Session = Depends(ge
         "lead": ser.lead(conv.customer.lead),
         "customer": ser.customer(conv.customer),
     }
+
+
+@router.post("/{conversation_id}/messages", dependencies=[Depends(rate_limit)])
+def send_message(conversation_id: str, body: MessageIn, db: Session = Depends(get_db)):
+    conv = db.get(Conversation, conversation_id)
+    if not conv:
+        raise HTTPException(404, "Conversation not found")
+    if body.channel and body.channel != conv.channel and body.channel == "voice":
+        conv.channel = "voice"
+    return process_message(db, conv, body.text)
 
 
 @router.get("/{conversation_id}")
@@ -93,22 +107,27 @@ def get_conversation(conversation_id: str, db: Session = Depends(get_db)):
     return d
 
 
-@router.post("/{conversation_id}/end")
-def end_conversation(conversation_id: str, db: Session = Depends(get_db)):
-    conv = db.get(Conversation, conversation_id)
-    if not conv:
-        raise HTTPException(404, "Conversation not found")
+def close_conversation(db: Session, conv: Conversation, llm_timeout_seconds: float | None = None) -> Conversation:
+    """Finalize a conversation once, qualify the lead and save its summary."""
     if conv.status == "active":
         conv.status = "ended"
         conv.ended_at = datetime.utcnow()
         db.commit()
-    ctx = ToolContext(db=db, conversation=conv)
+    ctx = ToolContext(db=db, conversation=conv, llm_timeout_seconds=llm_timeout_seconds)
     execute_tool(ctx, "qualify_lead", {"customer_id": conv.customer_id})
     res = execute_tool(ctx, "create_conversation_summary", {"conversation_id": conv.id})
     if not res["ok"]:
         raise HTTPException(500, res["error"]["message"])
     db.refresh(conv)
-    return ser.conversation(conv, with_messages=False)
+    return conv
+
+
+@router.post("/{conversation_id}/end")
+def end_conversation(conversation_id: str, db: Session = Depends(get_db)):
+    conv = db.get(Conversation, conversation_id)
+    if not conv:
+        raise HTTPException(404, "Conversation not found")
+    return ser.conversation(close_conversation(db, conv), with_messages=False)
 
 
 # ---- admin views ----------------------------------------------------------------

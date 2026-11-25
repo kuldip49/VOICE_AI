@@ -28,6 +28,10 @@ cd frontend; npm install; cd ..
 
 Open **http://localhost:5173/agent**, click **Start call**, allow the microphone, and talk.
 
+### Connect an actual phone number
+
+Inbound calls use Twilio Programmable Voice and the same Gemini/RAG sales agent. Configure a Twilio voice number, an externally reachable HTTPS backend URL, and the webhook credentials in `backend/.env`. Then set the number's **A call comes in** URL to `/api/telephony/twilio/voice` with POST. The caller presses 1 for English or 2 for Hindi. The backend checks Twilio signatures and saves the phone transcript, lead, bookings, and summary in the existing CRM. Follow [Inbound phone calls](docs/TELEPHONY_SETUP.md) for all setup steps and the limits of the live configuration.
+
 ### Turn on a real LLM (optional, free options)
 
 | Option | How | Cost |
@@ -55,6 +59,7 @@ Full 5-minute script: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
 | Module | Where |
 |---|---|
 | Voice conversation (Web Speech STT/TTS, mic level meter, hands-free, barge-in, mute, stop speaking, text fallback) | `frontend/src/pages/LiveAgent.tsx`, `frontend/src/hooks/useVoice.ts` |
+| Inbound telephone calls (Twilio voice webhooks, signed requests, Hindi/English speech, Gemini/RAG agent, CRM and summaries) | `backend/app/routers/telephony.py`, [setup guide](docs/TELEPHONY_SETUP.md) |
 | Agent orchestration with 10 validated, logged tools | `backend/app/agent/` |
 | RAG: PDF/TXT upload, section chunking, BM25 (+ optional embeddings), source references, "not in KB" guard | `backend/app/services/rag.py` |
 | Contextual + persistent memory, context window with rolling summary, inspect/delete memories | `orchestrator.py`, `customer_memories` table, CRM drawer |
@@ -93,6 +98,7 @@ Every row below has a green check for a contribution that is present and evidenc
 | Gemini / Ollama answers | ✅ Both provider adapters are implemented | ✅ Gemini generation checked live; provider HTTP behavior is covered by mocked tests | Ollama was not run as a local service here. Gemini keys are local and are not in GitHub. |
 | Embedding hybrid retrieval | ✅ Optional hybrid ranking is implemented | ✅ Live Gemini embedding and hybrid retrieval checked against an in-memory knowledge base | Existing chunks without vectors use BM25 until embeddings are generated for them. |
 | Browser speech recognition and playback | ✅ Uses browser Web Speech APIs | ✅ Frontend production build passes; unsupported and blocked-microphone UI paths are covered by the recorded browser checks | A live microphone conversation still needs a Chrome/Edge check on the target device. |
+| Twilio inbound phone assistant | ✅ Webhook integration is implemented | ⚠️ External phone call not configured here | A Twilio voice number, public HTTPS backend URL, and local Twilio auth token are required before anyone can dial it. See [setup guide](docs/TELEPHONY_SETUP.md). |
 | Docker Compose | ✅ Compose and container files are included | ✅ `docker compose config --quiet` passes | Image build was not run because Docker Desktop's engine was unavailable in this session. |
 | Local appointment calendar and provider seam | ✅ Local database calendar and adapter interface are implemented | ✅ Appointment booking tests pass in the backend suite | A Google Calendar API adapter is future work; local database scheduling is active. |
 | 100,000-user architecture | ✅ A scaling design and roadmap are documented in [docs/SCALABILITY.md](docs/SCALABILITY.md) | ✅ Design assumptions and implementation boundaries are documented | Design only: no 100,000-user load test or production deployment is claimed. |

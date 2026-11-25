@@ -6,6 +6,7 @@ from collections import Counter
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from ..config import get_settings
 from ..models import Appointment, CallSummary, Conversation, SentimentRecord
 from .llm import ChatMessage, LLMError, get_provider
 from .scheduling import format_slot
@@ -17,7 +18,8 @@ FOLLOW_UPS = {
 }
 
 
-def build_summary(db: Session, conversation: Conversation) -> CallSummary:
+def build_summary(db: Session, conversation: Conversation,
+                  llm_timeout_seconds: float | None = None) -> CallSummary:
     customer = conversation.customer
     lead = customer.lead
     sentiments = db.execute(select(SentimentRecord).where(SentimentRecord.conversation_id == conversation.id)).scalars().all()
@@ -53,7 +55,10 @@ def build_summary(db: Session, conversation: Conversation) -> CallSummary:
     text = " ".join(facts)
     generated_by = "demo-rules"
 
-    provider = get_provider()
+    provider_settings = get_settings()
+    if llm_timeout_seconds is not None:
+        provider_settings = provider_settings.model_copy(update={"llm_timeout_seconds": llm_timeout_seconds})
+    provider = get_provider(provider_settings)
     if provider and user_msgs:
         transcript = "\n".join(f"{m.role}: {m.content}" for m in conversation.messages[-30:])
         try:

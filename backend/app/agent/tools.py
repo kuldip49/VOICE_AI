@@ -28,6 +28,7 @@ class ToolContext:
     db: Session
     conversation: Conversation | None = None
     embed_fn: Callable | None = None
+    llm_timeout_seconds: float | None = None
 
 
 class ToolError(Exception):
@@ -232,7 +233,7 @@ def t_create_conversation_summary(ctx: ToolContext, a: SummaryIn) -> dict:
     conv = ctx.db.get(Conversation, a.conversation_id)
     if not conv:
         raise ToolError("not_found", "Conversation not found")
-    s = summary.build_summary(ctx.db, conv)
+    s = summary.build_summary(ctx.db, conv, llm_timeout_seconds=ctx.llm_timeout_seconds)
     return {"summary_id": s.id, "summary": s.summary, "follow_up_action": s.follow_up_action,
             "sentiment": s.sentiment, "lead_score": s.lead_score, "generated_by": s.generated_by}
 

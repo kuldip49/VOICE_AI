@@ -1,15 +1,16 @@
 # PROJECT_PROGRESS
 
-Last update: 2026-11-26 (Kiln & Signal frontend refresh). Statuses: NOT STARTED · IN PROGRESS · BLOCKED · IMPLEMENTED · TESTED · VERIFIED (= tested + checked in a real browser).
+Last update: 2026-11-26 (Twilio inbound phone integration). Statuses: NOT STARTED · IN PROGRESS · BLOCKED · IMPLEMENTED · TESTED · VERIFIED (= tested + checked in a real browser).
 
 ## Current status
-Functional MVP rebranded as Kiln & Signal. The frontend has a warm monochrome palette, editorial type, and restrained ambient motion; the backend workflow and API were left unchanged. Gemini is configured in the local ignored `backend/.env`; no API key is stored in this repository. The latest backend suite passes, and the earlier real-browser workflow is recorded below.
+Functional MVP rebranded as Kiln & Signal. The inbound Twilio phone-call backend now reuses the Gemini/RAG sales agent, CRM, appointment and summary pipeline, with signed webhooks and English/Hindi keypad language choice. Gemini is configured in the local ignored `backend/.env`; no API keys are stored in this repository. Live phone calls still need a Twilio voice-capable number and a public HTTPS URL configured in Twilio Console.
 
 ## Features
 | Feature | Status | Evidence |
 |---|---|---|
 | Text conversation | VERIFIED | `test_full_sales_workflow`, browser steps 2-10 |
 | Voice: STT/TTS, mic meter, hands-free, barge-in, mute, stop | IMPLEMENTED | Code + unsupported/blocked-mic UI verified; live mic not testable headless. **Test in Chrome/Edge on PC** |
+| Inbound phone calls (Twilio, speech turns, Gemini/RAG, CRM, summaries) | IMPLEMENTED (external setup pending) | FastAPI Twilio webhook routes and setup guide added; live carrier call not configured | Requires public HTTPS backend, Twilio voice number/auth token, and Twilio Console webhook settings; dependency install required. |
 | English + Hindi | VERIFIED (text) | `test_hindi_workflow`, browser step 7 |
 | Contextual + persistent memory, context window | TESTED | `test_contextual_memory…`, `test_persistent_memory…`, `test_context_window_rolls_summary` |
 | RAG: upload PDF/TXT, chunk, BM25, sources, not-found guard | VERIFIED | `tests/test_rag.py` (9), Knowledge page step |

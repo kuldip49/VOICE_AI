@@ -1,7 +1,7 @@
 # Kiln & Signal — Project Report
 
 **Date:** 26 November 2026  
-**Status:** Functional local MVP; frontend rebranded as Kiln & Signal, Gemini and knowledge retrieval enabled
+**Status:** Functional local MVP; Gemini and knowledge retrieval enabled; inbound Twilio phone-call integration implemented, external number not configured
 
 ## Overview
 
@@ -11,13 +11,14 @@ Kiln & Signal is a voice and text sales assistant for the fictional TechNova Aca
 
 The browser interface sends messages to a FastAPI backend. The agent retrieves relevant passages from the academy's documents, then uses Gemini to write a natural-language answer grounded in those passages. If no relevant source is found, it avoids inventing an answer. Rule-based orchestration and validated tools handle customer records, lead scoring, sentiment, appointment scheduling, and summaries; the LLM does not directly book appointments. Booking requires the caller's confirmation.
 
-Voice input and playback use the browser Web Speech APIs. The Live Agent also supports typed messages, transcript/source display, hands-free operation, stopping speech, and call-ending phrases. Browser and device support affects voice recognition, so text entry remains available.
+Browser voice input and playback use the Web Speech APIs. An inbound Twilio voice webhook is also implemented: callers select English or Hindi with the keypad, Twilio transcribes speech, and the backend sends each turn to the same Gemini/RAG sales agent. Spoken replies, phone-based customer matching, call-end summaries, lead scoring, and confirmed appointment booking use the existing CRM workflow. Twilio signatures are validated server-side. A real number cannot receive calls until a Twilio voice-capable number is pointed to a public HTTPS deployment and its auth token is entered in the ignored backend `.env` file. See [the inbound phone setup](docs/TELEPHONY_SETUP.md).
 
 ## Technology
 
 - **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, and chart/UI components with a monochrome editorial visual system and subtle reduced-motion-aware background animation.
 - **Backend:** Python, FastAPI, Pydantic, SQLAlchemy, and SQLite.
 - **AI and retrieval:** Google Gemini, BM25 document search, Hindi query expansion/translation fallback, and optional embedding-based retrieval; demo templates remain available if no model is configured.
+- **Phone channel:** Twilio Programmable Voice, speech/DTMF Gather, English and Hindi India locales, signature-validated FastAPI webhooks.
 - **Documents and operations:** PDF/TXT/Markdown knowledge uploads, CRM, analytics, and appointment management.
 
 ## Run locally

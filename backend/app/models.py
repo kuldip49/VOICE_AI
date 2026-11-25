@@ -167,6 +167,21 @@ class CallSummary(Base):
     conversation: Mapped[Conversation] = relationship(back_populates="summary")
 
 
+class TelephonyCall(Base):
+    """Link a provider call SID to the conversation created for its caller."""
+    __tablename__ = "telephony_calls"
+    call_sid: Mapped[str] = mapped_column(String(40), primary_key=True)
+    conversation_id: Mapped[str | None] = mapped_column(ForeignKey("conversations.id", ondelete="SET NULL"),
+                                                        index=True)
+    caller_number: Mapped[str | None] = mapped_column(String(30))
+    language: Mapped[str | None] = mapped_column(String(10))
+    status: Mapped[str] = mapped_column(String(20), default="received", index=True)
+    language_attempts: Mapped[int] = mapped_column(Integer, default=0)
+    silence_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
+
+
 class SentimentRecord(Base):
     __tablename__ = "sentiment_records"
     id: Mapped[int] = mapped_column(primary_key=True)

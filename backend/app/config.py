@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     ollama_model: str = "llama3.2"
     llm_timeout_seconds: float = 30.0
 
+    # Inbound business phone calls (Twilio Programmable Voice)
+    twilio_auth_token: str = ""
+    twilio_public_base_url: str = ""  # public HTTPS origin used to validate signed callbacks
+    twilio_speech_model: str = "experimental_conversations"
+
     # Security
     admin_api_key: str = ""  # when set, CRM/admin endpoints require header X-Admin-Key
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"

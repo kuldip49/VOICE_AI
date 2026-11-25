@@ -148,12 +148,13 @@ class TurnResult:
 
 
 class SalesAgent:
-    def __init__(self, db: Session, conversation: Conversation, embed_fn=None):
+    def __init__(self, db: Session, conversation: Conversation, embed_fn=None, provider=None):
         self.db = db
         self.conv = conversation
         self.ctx = ToolContext(db=db, conversation=conversation, embed_fn=embed_fn)
         self.calls: list[dict] = []
         self.profile = get_setting(db, "business_profile")
+        self.provider = provider if provider is not None else get_provider()
 
     # -- helpers ---------------------------------------------------------
     def tool(self, _tool_name: str, /, **args) -> dict:
@@ -301,7 +302,7 @@ class SalesAgent:
             if kb_result["ok"] and not data.get("found") and lang == "hi":
                 # The sample KB is English. Let Gemini translate/rephrase a Hindi question for retrieval,
                 # but still require a matching KB chunk before asking it to answer.
-                provider = get_provider()
+                provider = self.provider
                 if provider:
                     search_context = f"Customer question: {text}\nKnown course interest: {lead_interest or 'unknown'}"
                     try:
@@ -464,7 +465,7 @@ class SalesAgent:
     # -- answer composition ----------------------------------------------------
     def _compose_answer(self, text, lang, intents, kb_result, sent, ex) -> tuple[str, str]:
         kb = (kb_result or {}).get("data") if kb_result and kb_result.get("ok") else None
-        provider = get_provider()
+        provider = self.provider
         price_objection = bool(sent and "price" in (sent.get("objections") or []))
 
         if "knowledge_question" in intents:
