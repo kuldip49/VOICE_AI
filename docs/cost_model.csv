@@ -1,0 +1,20 @@
+Input,Value,Unit,Note
+Conversations per month,3000,count,EDIT: expected volume for one Growth customer
+Messages per conversation,10,count,customer messages
+Input tokens per LLM call,1500,tokens,prompt incl. retrieved chunks
+Output tokens per LLM call,150,tokens,
+Input price per 1M tokens,0.30,USD,EDIT: check provider pricing
+Output price per 1M tokens,2.50,USD,EDIT: check provider pricing
+USD to INR,84,INR,EDIT
+Paid voice minutes per conversation,0,minutes,0 = browser speech (free)
+Paid STT+TTS price per minute,0.03,USD,EDIT if using telephony voice
+Infra cost per month,3000,INR,small VM + managed Postgres
+Plan price per month,9999,INR,Growth plan
+,,,
+Derived,Formula,,
+LLM cost per conversation (INR),"=B3*(B4*B6+B5*B7)/1000000*B8",INR,
+Voice cost per conversation (INR),=B9*B10*B8,INR,
+Total variable cost per month (INR),=B2*(B15+B16),INR,
+Total cost per month (INR),=B17+B11,INR,
+Gross margin (INR),=B12-B18,INR,
+Gross margin %,=B19/B12,%,

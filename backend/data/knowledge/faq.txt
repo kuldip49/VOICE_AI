@@ -1,0 +1,23 @@
+## FAQ: Are classes live or recorded?
+All classes are live online sessions conducted on Zoom. Recordings are uploaded to the learning portal within 24 hours and remain available for 12 months.
+
+## FAQ: Do I get a certificate?
+Yes. Every student who completes the course assessments and capstone project receives a verifiable TechNova Academy certificate.
+
+## FAQ: Can a complete beginner join?
+Yes. Complete beginners can start with Python Programming Foundations (6 weeks, ₹9,999), then move to the AI & Machine Learning Professional Program or Data Science with Python.
+
+## FAQ: What laptop do I need?
+Any laptop with 8 GB RAM, a modern browser, and a stable internet connection is enough. GPU work is done on free cloud notebooks, so no GPU is required.
+
+## FAQ: Who are the mentors?
+Mentors are industry practitioners with 5 or more years of experience in software engineering, data science, or machine learning.
+
+## FAQ: Is there doubt-clearing support?
+Yes. Students get doubt-clearing sessions twice a week and a community forum with mentor responses within 24 hours on working days.
+
+## FAQ: Can I attend a demo class?
+Yes. A free 60-minute demo class is held every Saturday at 11:00 AM IST. You can also book a free one-on-one counselling session with an academic counsellor.
+
+## FAQ: Which language are classes taught in?
+Classes are taught in English. Mentors can explain concepts in Hindi during doubt-clearing sessions.

@@ -1,0 +1,56 @@
+## TechNova Academy Course Catalog (2026-27)
+All courses are delivered as live online classes with recorded sessions available within 24 hours. All prices are in Indian Rupees (INR) and include 18% GST.
+
+## Course: AI & Machine Learning Professional Program
+Category: Artificial Intelligence, Machine Learning
+Duration: 6 months (live classes, 8 hours per week)
+Price: ₹45,000
+EMI option: ₹7,500 per month for 6 months (no-cost EMI)
+Upcoming batches: Weekday evening batch starts 8 December 2026 (Mon/Wed/Fri, 7:30 PM - 9:30 PM IST); Weekend batch starts 13 December 2026 (Sat/Sun, 10:00 AM - 1:00 PM IST)
+Syllabus: Python for AI, statistics, supervised and unsupervised learning, deep learning with PyTorch, computer vision, NLP, model deployment with FastAPI, MLOps basics, 3 industry capstone projects
+Prerequisites: Basic programming knowledge. Complete beginners should take Python Programming Foundations first.
+Certificate: TechNova AI & ML Professional Certificate
+
+## Course: Generative AI & LLM Engineering
+Category: Artificial Intelligence, Generative AI, Large Language Models
+Duration: 3 months (live classes, 6 hours per week)
+Price: ₹32,000
+EMI option: ₹8,000 per month for 4 months
+Upcoming batches: Weekend batch starts 20 December 2026 (Sat/Sun, 2:00 PM - 5:00 PM IST)
+Syllabus: Transformer fundamentals, prompt engineering, retrieval-augmented generation (RAG), vector databases, AI agents and tool calling, fine-tuning basics, evaluation and safety, capstone: build a production AI assistant
+Prerequisites: Python programming and basic machine learning concepts
+
+## Course: Data Science with Python
+Category: Data Science, Analytics
+Duration: 4 months (live classes, 6 hours per week)
+Price: ₹28,000
+EMI option: ₹7,000 per month for 4 months
+Upcoming batches: Weekday evening batch starts 15 December 2026 (Tue/Thu, 7:00 PM - 10:00 PM IST)
+Syllabus: Python, NumPy, pandas, data visualization, SQL, statistics, machine learning with scikit-learn, Power BI dashboards, 2 capstone projects
+Prerequisites: None
+
+## Course: Full-Stack Web Development (MERN)
+Category: Web Development, Software Development
+Duration: 5 months (live classes, 8 hours per week)
+Price: ₹35,000
+EMI option: ₹7,000 per month for 5 months
+Upcoming batches: Weekday batch starts 10 December 2026 (Mon-Thu, 8:00 PM - 10:00 PM IST)
+Syllabus: HTML, CSS, JavaScript, TypeScript, React, Node.js, Express, MongoDB, REST APIs, authentication, deployment, 4 portfolio projects
+Prerequisites: None
+
+## Course: Python Programming Foundations
+Category: Programming, Beginner
+Duration: 6 weeks (live classes, 5 hours per week)
+Price: ₹9,999
+Upcoming batches: New batch starts every month. Next batch starts 1 December 2026 (weekday evenings, 7:00 PM - 8:30 PM IST)
+Syllabus: Python syntax, data types, control flow, functions, files, object-oriented programming, mini projects
+Prerequisites: None. Recommended for complete beginners before the AI & ML program.
+
+## Course: Cloud & DevOps Engineering
+Category: Cloud Computing, DevOps
+Duration: 4 months (live classes, 6 hours per week)
+Price: ₹30,000
+EMI option: ₹7,500 per month for 4 months
+Upcoming batches: Weekend batch starts 14 December 2026 (Sat/Sun, 10:00 AM - 1:00 PM IST)
+Syllabus: Linux, Git, Docker, Kubernetes, CI/CD with GitHub Actions, AWS fundamentals, Terraform, monitoring
+Prerequisites: Basic command-line familiarity

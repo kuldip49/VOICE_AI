@@ -1,0 +1,12 @@
+{
+  "name": "salespilot-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Browser verification driven through the Playwright MCP and Chrome DevTools MCP servers",
+  "scripts": {
+    "verify-mcp": "node verify-mcp.mjs all",
+    "workflow": "node playwright-workflow.mjs",
+    "audit": "node devtools-audit.mjs"
+  },
+  "dependencies": { "@modelcontextprotocol/sdk": "^1.32.2" }
+}

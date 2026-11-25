@@ -1,0 +1,62 @@
+erDiagram
+  customers ||--o| leads : "has one"
+  customers ||--o{ conversations : has
+  customers ||--o{ customer_memories : remembers
+  customers ||--o{ appointments : books
+  customers ||--o{ call_summaries : has
+  customers ||--o{ sentiment_records : has
+  conversations ||--o{ messages : contains
+  conversations ||--o| call_summaries : "summarised by"
+  conversations ||--o{ sentiment_records : has
+  conversations ||--o{ agent_tool_logs : logs
+  messages ||--o{ sentiment_records : "analysed in"
+  knowledge_documents ||--o{ knowledge_chunks : "split into"
+  customers {
+    int id PK
+    string name
+    string email
+    string phone
+    string language
+  }
+  leads {
+    int id PK
+    int customer_id FK
+    string interest
+    int budget
+    string timeline
+    int score
+    string category
+    string status
+    json score_reasons
+  }
+  conversations {
+    string id PK
+    int customer_id FK
+    string channel
+    string language
+    string status
+    json state
+    text memory_summary
+  }
+  messages {
+    int id PK
+    string conversation_id FK
+    string role
+    text content
+    json sources
+    string generated_by
+  }
+  appointments {
+    int id PK
+    int customer_id FK
+    string conversation_id FK
+    datetime start_time
+    string status
+  }
+  knowledge_chunks {
+    int id PK
+    int document_id FK
+    string title
+    text content
+    json embedding
+  }

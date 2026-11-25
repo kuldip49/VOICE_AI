@@ -1,0 +1,15 @@
+## About TechNova Academy
+TechNova Academy is an online technology education company (fictional demo business) that offers live training in software development, data science, cloud computing, and artificial intelligence.
+TechNova Academy was founded in 2019 and is headquartered in Bengaluru, India.
+More than 12,000 learners have enrolled in TechNova programs.
+
+## Contact Information
+Phone: +91 80 4000 1234 (Monday to Saturday, 10:00 AM - 7:00 PM IST)
+Email: admissions@technova-academy.example
+Website: www.technova-academy.example
+Address: 4th Floor, Innovation Hub, Koramangala, Bengaluru 560034, India
+
+## Counselling Sessions
+Free one-on-one counselling sessions with an academic counsellor last 30 minutes and are held online by video call.
+Counselling sessions are available Monday to Saturday between 10:00 AM and 6:00 PM IST.
+In a counselling session the counsellor reviews your background and goals, recommends a course, and explains payment options.

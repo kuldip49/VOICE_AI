@@ -1,0 +1,154 @@
+@import "tailwindcss";
+@import "@fontsource-variable/instrument-sans";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* SalesPilot tokens. Cool porcelain + navy ink + cobalt action colour; teal marks "live" voice state. */
+:root {
+  --background: #f3f5f8;
+  --foreground: #172131;
+  --card: #ffffff;
+  --card-foreground: #172131;
+  --muted: #eaeef3;
+  --muted-foreground: #586477;
+  --border: #dde3ea;
+  --input: #cfd7e1;
+  --primary: #2b55d6;
+  --primary-foreground: #ffffff;
+  --secondary: #e7ecf4;
+  --secondary-foreground: #1d2a3d;
+  --accent: #e9eefb;
+  --accent-foreground: #1c3a9a;
+  --destructive: #c4322b;
+  --destructive-foreground: #ffffff;
+  --ring: #2b55d6;
+  --live: #0b8574;
+  --live-soft: #dcf3ef;
+  --hot: #b93a1c;
+  --hot-soft: #fde8e1;
+  --warm: #93620a;
+  --warm-soft: #fbf0d6;
+  --cold: #3b628f;
+  --cold-soft: #e3ecf6;
+  --ok: #1f7a3a;
+  --ok-soft: #e0f2e5;
+  /* chart series: validated categorical slots 1-3 (dataviz reference palette) */
+  --series-1: #257de0;
+  --series-2: #f47230;
+  --series-3: #00b894;
+  --grid: #e6eaf0;
+  --sidebar: #ffffff;
+}
+
+.dark {
+  --background: #0d131b;
+  --foreground: #e4e9f0;
+  --card: #141c26;
+  --card-foreground: #e4e9f0;
+  --muted: #1b2532;
+  --muted-foreground: #8e9aab;
+  --border: #243142;
+  --input: #2e3c50;
+  --primary: #7291ff;
+  --primary-foreground: #0b1020;
+  --secondary: #1f2a39;
+  --secondary-foreground: #dfe6ef;
+  --accent: #1c2740;
+  --accent-foreground: #b7c7ff;
+  --destructive: #ef5f57;
+  --destructive-foreground: #0d131b;
+  --ring: #7291ff;
+  --live: #35c2ad;
+  --live-soft: #123430;
+  --hot: #ff8a6b;
+  --hot-soft: #3a1d16;
+  --warm: #f2c25a;
+  --warm-soft: #352a10;
+  --cold: #8fb3e0;
+  --cold-soft: #172638;
+  --ok: #6fd18c;
+  --ok-soft: #13301c;
+  --series-1: #338ced;
+  --series-2: #e76624;
+  --series-3: #00a888;
+  --grid: #1f2a38;
+  --sidebar: #111821;
+}
+
+@theme inline {
+  --font-sans: "Instrument Sans Variable", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-ring: var(--ring);
+  --color-live: var(--live);
+  --color-live-soft: var(--live-soft);
+  --color-hot: var(--hot);
+  --color-hot-soft: var(--hot-soft);
+  --color-warm: var(--warm);
+  --color-warm-soft: var(--warm-soft);
+  --color-cold: var(--cold);
+  --color-cold-soft: var(--cold-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-sidebar: var(--sidebar);
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    font-feature-settings: "ss01", "cv11";
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Voice level meter bars (driven by real mic level via inline style) */
+.meter-bar {
+  transition: height 90ms linear;
+}
+@keyframes speak {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+.speaking-bar {
+  animation: speak 0.9s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .speaking-bar, .meter-bar, .animate-spin, .animate-pulse {
+    animation: none !important;
+    transition: none !important;
+  }
+}

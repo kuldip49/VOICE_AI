@@ -1,0 +1,22 @@
+flowchart TD
+  M["Customer message"] --> LANG["Detect language (en / hi)"]
+  LANG --> EX["Extract facts: name, email, phone,<br/>budget, interest, timeline, authority"]
+  EX --> UP["tool: update_customer_profile"]
+  UP --> SE["tool: analyze_sentiment"]
+  SE --> PL{"Intent planner"}
+  PL -- "question" --> KB["tool: search_knowledge_base"]
+  PL -- "wants appointment" --> SL["tool: get_available_slots"]
+  PL -- "picks slot" --> CF["Ask for confirmation<br/>(nothing saved yet)"]
+  PL -- "confirms" --> BK["tool: book_appointment(confirmed=true)"]
+  PL -- "cancel" --> CA["tool: cancel_appointment (after yes)"]
+  KB --> CRM["tool: update_crm_record + qualify_lead"]
+  SL --> CRM
+  CF --> CRM
+  BK --> CRM
+  CA --> CRM
+  CRM --> R{"KB answer found?"}
+  R -- "no" --> NF["Say: not in knowledge base"]
+  R -- "yes" --> W["LLM writes grounded answer<br/>or labelled template"]
+  NF --> Q["Append one missing qualifying question"]
+  W --> Q
+  Q --> OUT["Reply + sources + tool trace"]

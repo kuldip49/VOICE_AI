@@ -1,0 +1,27 @@
+flowchart LR
+  subgraph Browser["Browser (Chrome / Edge)"]
+    UI["React + TypeScript dashboard<br/>Vite, Tailwind, shadcn/ui"]
+    STT["Web Speech API<br/>SpeechRecognition (STT)"]
+    TTS["speechSynthesis (TTS)"]
+  end
+  subgraph Backend["FastAPI backend (Python)"]
+    API["REST API /api/*<br/>Pydantic validation, CORS, rate limit, admin key"]
+    AGENT["Sales agent orchestrator<br/>intent planner + response composer"]
+    TOOLS["10 validated agent tools<br/>+ tool execution log"]
+    RAG["RAG: chunking + BM25<br/>(+ optional embeddings)"]
+    SCORE["Lead scoring, sentiment,<br/>extraction, summaries"]
+    CAL["Local calendar<br/>(Google Calendar adapter seam)"]
+  end
+  DB[("SQLite<br/>12 tables via SQLAlchemy")]
+  LLM["LLM provider (optional)<br/>Gemini API or local Ollama"]
+  UI <--> STT
+  UI <--> TTS
+  UI -- "HTTP JSON via Vite proxy" --> API
+  API --> AGENT --> TOOLS
+  TOOLS --> RAG
+  TOOLS --> SCORE
+  TOOLS --> CAL
+  RAG --> DB
+  SCORE --> DB
+  CAL --> DB
+  AGENT -. "grounded prompt (if configured)" .-> LLM

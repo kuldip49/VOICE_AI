@@ -1,0 +1,26 @@
+sequenceDiagram
+  participant C as Customer
+  participant B as Browser (React)
+  participant A as FastAPI /messages
+  participant G as Agent orchestrator
+  participant K as Knowledge base (RAG)
+  participant D as SQLite
+  participant L as LLM (optional)
+  C->>B: speaks "Tell me about your AI course"
+  B->>B: SpeechRecognition -> text
+  B->>A: POST /api/conversations/{id}/messages
+  A->>G: handle(text)
+  G->>D: save message, update_customer_profile
+  G->>D: analyze_sentiment -> sentiment_records
+  G->>K: search_knowledge_base(query + remembered interest)
+  K-->>G: top chunks + scores (found / not found)
+  G->>D: update_crm_record, qualify_lead (score + reasons)
+  alt LLM configured and KB found
+    G->>L: system prompt + retrieved chunks + recent turns
+    L-->>G: grounded answer
+  else demo mode or LLM error
+    G->>G: template answer quoting the chunks (labelled)
+  end
+  G->>D: save assistant message (+ sources, generated_by)
+  A-->>B: reply, sources, lead, sentiment, tool trace
+  B->>C: speechSynthesis reads the reply
