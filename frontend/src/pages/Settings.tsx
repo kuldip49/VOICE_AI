@@ -182,18 +182,19 @@ export default function Settings() {
             Change these in <code className="rounded bg-muted px-1">backend/.env</code> and restart the backend. <Badge variant="outline" className="ml-1">{env.environment}</Badge>
           </div>
         </Panel>
-        <Panel>
-          <PanelHeader title="Inbound phone" description="Shows environment values. The setup command verifies ownership and connects the number." />
+        {env.telephony.ready && <Panel>
+          <PanelHeader title="Inbound phone" description="Exotel AgentStream carries phone audio to this API; Sarvam handles live speech recognition and speech output." />
           <ul className="space-y-2.5 px-5 py-4 text-[13px]">
-            <li><Status ok={env.telephony.account_configured}>Twilio account credentials {env.telephony.account_configured ? 'configured' : 'missing from backend/.env'}</Status></li>
-            <li><Status ok={Boolean(env.telephony.phone_number)}>Number value {env.telephony.phone_number || 'not set in backend/.env'}</Status></li>
-            <li><Status ok={env.telephony.webhook_configured}>Public HTTPS webhook {env.telephony.webhook_configured ? 'configured' : 'missing TWILIO_PUBLIC_BASE_URL'}</Status></li>
-            <li><Status ok={env.telephony.ready}>Environment fields {env.telephony.ready ? 'complete; number ownership not checked' : 'incomplete'}</Status></li>
+            <li><Status ok={env.telephony.account_configured}>Exotel account key and token {env.telephony.account_configured ? 'configured' : 'missing from backend/.env'}</Status></li>
+            <li><Status ok={Boolean(env.telephony.phone_number)}>ExoPhone {env.telephony.phone_number || 'not set in backend/.env'}</Status></li>
+            <li><Status ok={env.telephony.stream_configured}>Public WSS endpoint {env.telephony.stream_configured ? env.telephony.wss_url : 'missing EXOTEL_PUBLIC_WSS_URL'}</Status></li>
+            <li><Status ok={env.telephony.speech_configured}>Sarvam speech API key {env.telephony.speech_configured ? 'configured' : 'missing SARVAM_API_KEY'}</Status></li>
+            <li><Status ok={env.telephony.ready}>Environment fields {env.telephony.ready ? 'complete; Exotel flow assignment still required' : 'incomplete'}</Status></li>
           </ul>
           <div className="border-t px-5 py-3 text-[12px] text-muted-foreground">
-            Run <code className="rounded bg-muted px-1">python -m app.telephony_setup</code> after setting the public URL to connect the number's incoming-call webhook. Details: <code className="rounded bg-muted px-1">docs/TELEPHONY_SETUP.md</code>.
+            Run <code className="rounded bg-muted px-1">python -m app.telephony_setup</code> to print the WSS endpoint and Exotel setup steps. In Exotel, assign the number to an App Bazaar flow with a Voicebot applet. Details: <code className="rounded bg-muted px-1">docs/TELEPHONY_SETUP.md</code>.
           </div>
-        </Panel>
+        </Panel>}
         {access}
       </div>
     </div>

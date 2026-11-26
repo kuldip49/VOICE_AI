@@ -6,6 +6,7 @@ import { useTheme } from '@/hooks/useTheme'
 
 const Overview = lazy(() => import('@/pages/Overview'))
 const LiveAgent = lazy(() => import('@/pages/LiveAgent'))
+const CallRecordings = lazy(() => import('@/pages/CallRecordings'))
 const Crm = lazy(() => import('@/pages/Crm'))
 const Appointments = lazy(() => import('@/pages/Appointments'))
 const Knowledge = lazy(() => import('@/pages/Knowledge'))
@@ -24,6 +25,7 @@ export default function App() {
           <Route element={<AppShell />}>
             <Route index element={<Overview />} />
             <Route path="agent" element={<LiveAgent />} />
+            <Route path="recordings" element={<CallRecordings />} />
             <Route path="crm" element={<Crm />} />
             <Route path="appointments" element={<Appointments />} />
             <Route path="knowledge" element={<Knowledge />} />

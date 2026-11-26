@@ -1,60 +1,78 @@
-# Inbound phone calls
+# Inbound phone calls with Exotel AgentStream
 
-The backend can answer inbound calls through Twilio Programmable Voice. Twilio handles the phone number, speech recognition, and synthesized speech. The app connects each call to the same sales agent used by the web voice desk, so Gemini, RAG, lead extraction, appointment booking, and call summaries are shared. Caller turns and assistant replies are stored in the normal conversation transcript; the provider call SID links that transcript to the phone session.
+The inbound call bridge uses Exotel for the Indian phone number and bidirectional call audio. The existing SalesPilot sales agent continues to handle the caller's conversation, CRM updates, lead scoring, appointment workflow and call summary. Sarvam handles real-time speech recognition and spoken replies. This is a separately configured phone channel from browser voice, which uses the browser Web Speech API.
 
-The caller presses **1 for English** or **2 for Hindi**. Twilio then uses the matching India speech locale (`en-IN` or `hi-IN`). Press **9** during the call to switch between English and Hindi. Say “hang up,” “end the call,” “bye,” or the Hindi equivalent to close the call and create its summary. If the caller hangs up without saying goodbye, configure Twilio's number status callback below so the session can be finalized.
+## Call path
 
-## Configure it
+1. A caller dials the ExoPhone assigned to the Exotel account.
+2. An Exotel App Bazaar flow runs a Voicebot applet and opens a secure WebSocket to `/api/telephony/exotel/stream`.
+3. Exotel sends mono, 16 kHz, linear16 PCM audio in JSON `media` events. The backend forwards audio to Sarvam realtime STT.
+4. Final transcripts enter the existing `process_message` flow, which invokes the SalesAgent, retrieval, tools and CRM.
+5. Sarvam TTS streams the agent's English or Hindi reply back as PCM audio frames for Exotel to play to the caller.
+6. Exotel's `stop` event or a goodbye finalizes the conversation and CRM summary. Pressing 9 switches between English and Hindi.
 
-1. Install the project requirements again after pulling this change so the Twilio Python SDK is installed:
+Exotel's inbound setup is a Voicebot applet assigned to a number through an App Bazaar flow. The applet needs an internet-reachable `wss://` URL and Basic Auth credentials. AgentStream availability may require a separate Exotel activation or plan; confirm it with Exotel before relying on it. Sarvam API use also requires an account/key and is subject to Sarvam's current pricing and limits.
 
-   ```powershell
-   .\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
-   ```
+## 1. Prepare the server
 
-2. Run the backend on a host that Twilio can reach over public HTTPS. For local development, use a secure HTTPS tunnel; `localhost` and a LAN IP are not reachable by Twilio.
+Install the backend requirements after switching providers:
 
-3. Put these values in `backend/.env` (never commit this file):
-
-   ```dotenv
-   TWILIO_ACCOUNT_SID=your_twilio_account_sid
-   TWILIO_AUTH_TOKEN=your_twilio_auth_token
-   TWILIO_PHONE_NUMBER=+14155550123
-   TWILIO_PUBLIC_BASE_URL=https://your-public-host.example
-   LLM_PROVIDER=auto
-   GEMINI_API_KEY=your_existing_gemini_key
-   ```
-
-   Use the account SID and auth token from the Twilio account that owns the number. Set `TWILIO_PHONE_NUMBER` to that Twilio number in E.164 format. Set `TWILIO_PUBLIC_BASE_URL` to the HTTPS **origin** only, with no endpoint path or trailing slash. Keep Gemini configured on the backend; the phone webhook runs the existing provider selection and records `generated_by` on each reply.
-
-4. Connect the number's incoming-call handler from the backend directory:
-
-   ```text
-   ..\.venv\Scripts\python.exe -m app.telephony_setup
-   ```
-
-   This verifies the number belongs to the configured account, then sets the voice webhook and status callback to the app. It stops without modifying the number if it is already attached to a Voice Application or SIP trunk. You can also configure it manually in the Twilio Console: set **A call comes in** to `https://your-public-host.example/api/telephony/twilio/voice` with **HTTP POST**. If the phone number configuration exposes a status callback, set it to:
-
-   ```text
-   https://your-public-host.example/api/telephony/twilio/status
-   ```
-
-   Choose **HTTP POST** for the status callback too. The status callback is optional for answering calls, but it lets the app save a summary if someone disconnects without saying goodbye.
-
-5. Call the Twilio number from a permitted phone. The caller selects a language, asks a business question, and receives spoken answers from the configured agent. Test RAG answers, caller details, a counselling booking, and ending a call before public use.
-
-Twilio signs every webhook. The backend validates `X-Twilio-Signature` using Twilio's official Python SDK, the configured auth token, and the exact public webhook URL; it rejects requests if validation settings or the SDK are missing. Phone-path model calls use short timeouts because Twilio limits call-related webhook responses to 15 seconds; when Gemini times out, the sales agent falls back to a grounded response. Serve only over HTTPS. The Twilio auth token and Gemini API key stay in `backend/.env` and must not be entered in this repository or the browser.
-
-## What has to exist for live calls
-
-The repository contains the inbound call integration, but a code change alone cannot make a reachable phone number. Live calls require a Twilio account with a voice-capable number owned by that account, a public HTTPS deployment/tunnel, the account credentials set locally, and the number pointed to the webhook above. Twilio trial accounts can only receive inbound calls from caller IDs verified on the trial account, so a trial number is suitable for a restricted demonstration, not for calls from everyone. A demo open to the public needs an upgraded account and an active voice number. Twilio phone usage and speech services can incur provider charges; Gemini usage also follows the configured Google account limits/pricing. Availability and supported numbers depend on the Twilio account and country. See Twilio's [trial account restrictions](https://help.twilio.com/articles/360036052753).
-
-## Call flow
-
-```text
-Caller -> Twilio number -> signed /voice webhook -> English/Hindi keypad choice
-       -> signed speech/DTMF Gather -> /turn -> SalesAgent + Gemini + RAG
-       -> Twilio speaks answer -> CRM / booking / summary records
+```powershell
+cd backend
+pip install -r requirements.txt
 ```
 
-Twilio's `<Gather>` sends recognized speech or keypad input to the action URL and continues with the returned TwiML. The selected conversational speech model supports both `en-IN` and `hi-IN`. The backend stores the caller's phone number on the CRM customer record and saves the text transcript; this application does not record caller audio. See Twilio's official [Gather reference](https://www.twilio.com/docs/voice/twiml/gather), [webhook signature guidance](https://www.twilio.com/docs/usage/webhooks/webhooks-security), [voice webhook timeout details](https://www.twilio.com/docs/usage/webhooks/webhooks-connection-overrides), and [IncomingPhoneNumber resource](https://www.twilio.com/docs/phone-numbers/api/incomingphonenumber-resource).
+Set the following in the ignored `backend/.env` file. Keep all credentials server-side; do not put them in the browser or commit the `.env` file.
+
+```dotenv
+EXOTEL_ACCOUNT_SID=your_exotel_account_sid
+EXOTEL_API_KEY=your_exotel_api_key
+EXOTEL_API_TOKEN=your_exotel_api_token
+EXOTEL_PHONE_NUMBER=+91xxxxxxxxxx
+EXOTEL_PUBLIC_WSS_URL=wss://voice.example.com/api/telephony/exotel/stream
+EXOTEL_SAMPLE_RATE=16000
+SARVAM_API_KEY=your_sarvam_api_key
+SARVAM_STT_MODEL=saaras:v4
+SARVAM_TTS_MODEL=bulbul:v3
+SARVAM_VOICE_EN=ishita
+SARVAM_VOICE_HI=priya
+```
+
+Keep the existing LLM configuration if you want Gemini, Grok or Ollama to write the agent's responses. Without a configured hosted/local model, the existing demo response mode remains available. `EXOTEL_PUBLIC_WSS_URL` must be a public secure WebSocket URL ending in `/api/telephony/exotel/stream?sample-rate=16000`; keep credentials out of `.env`'s URL and use the fixed 16 kHz audio setting. For local development, a plain `localhost` URL cannot receive Exotel calls; use a WSS-capable public tunnel or deployed host.
+
+The generated WSS route requires HTTP Basic Auth. Exotel's Voicebot applet takes the API key and token in the WSS URL and sends them in the `Authorization: Basic` header during the handshake. In the Exotel URL field, enter `wss://<API_KEY>:<API_TOKEN>@voice.example.com/api/telephony/exotel/stream?sample-rate=16000`, using your own server host and credentials; this credential-bearing URL belongs only in the Exotel console. Exotel defaults the stream to 8 kHz if the `sample-rate=16000` query is omitted, and this bridge will reject that mismatch. TLS/WSS is required in deployment. The Docker Nginx configuration forwards WebSocket upgrade headers and allows long-lived connections; Vite's development proxy also supports WebSockets.
+
+From the `backend/` directory, run the setup helper to validate environment values and print the console configuration:
+
+```powershell
+python -m app.telephony_setup
+```
+
+The helper does not call Exotel or attach the number for you; Exotel's number-to-flow assignment is performed in its console. It prints a URL template with credential placeholders, not your secret values.
+
+## 2. Configure the Exotel number and flow
+
+In the Exotel console:
+
+1. Confirm the account has an inbound ExoPhone and that AgentStream / Voicebot applets are enabled for it.
+2. Create an App Bazaar flow and add a Voicebot applet.
+3. Use the URL template printed by the helper, your public host/path from `EXOTEL_PUBLIC_WSS_URL`, and the credentials from `backend/.env`.
+4. In the WSS URL, place `EXOTEL_API_KEY:EXOTEL_API_TOKEN@` between `wss://` and your hostname so Exotel can send the credentials as a Basic Auth header.
+5. Keep `?sample-rate=16000` on the URL and select mono linear16 PCM at 16,000 Hz for both directions.
+6. Assign the inbound ExoPhone to that flow. A closed bidirectional stream advances to the next applet; add an End Call applet after Voicebot if the flow should end the call.
+
+The API checks the Basic Auth header before accepting the WebSocket. The Exotel start event supplies the call ID and caller number used to create or match the CRM customer and conversation.
+
+## 3. Check configuration and call
+
+Restart the backend after editing `.env`. The admin Settings page reports whether the Exotel credentials, ExoPhone, WSS URL and Sarvam key are present; it never returns secret values. `GET /api/telephony/exotel/status` gives the same non-secret readiness status.
+
+Once the public server is reachable and the number is assigned to the flow, call the ExoPhone from an allowed caller. Speak English or Hindi; press 9 to switch languages. Say goodbye to have the agent finish the conversation summary, or hang up normally to finalize it after Exotel sends `stop`.
+
+Exotel trial accounts may restrict incoming calls from unverified caller numbers and prompt the caller for an account PIN. Trial accounts and usage credits are for restricted evaluation, not an assumption of free production calling. Check current Exotel account/plan terms and AgentStream charges before opening the number to customers.
+
+## Current implementation boundary
+
+The repository contains the Exotel WebSocket handler, Sarvam streaming bridge, CRM/agent callbacks, readiness display, reverse-proxy support and this setup guide. A live number has **not** been connected from this workspace. Live calls still need an Exotel account with Voicebot/AgentStream enabled, an assigned ExoPhone and flow, public WSS hosting, valid Exotel credentials and a Sarvam API key. No credentials are included in this repository.
+
+For protocol details see Exotel's [Voicebot applet documentation](https://docs.exotel.com/exotel-agentstream/voicebot-applet) and [AgentStream setup guidance](https://docs.exotel.com/exotel-agentstream/agentstream-what-to-use-when), Sarvam's [real-time STT guide](https://docs.sarvam.ai/api/api-guides-tutorials/speech-to-text/realtime-streaming) and [streaming TTS guide](https://docs.sarvam.ai/api/api-guides-tutorials/text-to-speech/streaming-api/web-socket), and Exotel's [trial account limitations](https://docs.exotel.com/business-phone-system/create-a-trial-account) and [pricing](https://exotel.com/pricing/business-phone-system/).

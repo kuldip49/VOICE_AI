@@ -1,7 +1,7 @@
 # Kiln & Signal — Project Report
 
 **Date:** 26 November 2026  
-**Status:** Functional local MVP; Gemini and knowledge retrieval enabled; inbound Twilio phone-call integration implemented, external number not configured
+**Status:** Functional local MVP; Gemini and knowledge retrieval enabled; Exotel inbound stream path implemented, external number not configured
 
 ## Overview
 
@@ -11,14 +11,16 @@ Kiln & Signal is a voice and text sales assistant for the fictional TechNova Aca
 
 The browser interface sends messages to a FastAPI backend. The agent retrieves relevant passages from the academy's documents, then uses Gemini to write a natural-language answer grounded in those passages. If no relevant source is found, it avoids inventing an answer. Rule-based orchestration and validated tools handle customer records, lead scoring, sentiment, appointment scheduling, and summaries; the LLM does not directly book appointments. Booking requires the caller's confirmation.
 
-Browser voice input and playback use the Web Speech APIs. An inbound Twilio voice webhook is also implemented: callers select English or Hindi with the keypad, Twilio transcribes speech, and the backend sends each turn to the same Gemini/RAG sales agent. Spoken replies, phone-based customer matching, call-end summaries, lead scoring, and confirmed appointment booking use the existing CRM workflow. Twilio signatures are validated server-side. The Settings page now shows the configured Twilio number and readiness fields, and `python -m app.telephony_setup` can attach an owned number to the webhooks. A real number still needs a public HTTPS backend URL and must belong to the configured Twilio account. See [the inbound phone setup](docs/TELEPHONY_SETUP.md).
+Browser voice input and playback use the Web Speech APIs. The inbound phone path uses Exotel AgentStream for the number and bidirectional audio, Sarvam for real-time English/Hindi speech recognition and synthesis, and the same SalesAgent/RAG/CRM workflow for each call. It stores the phone transcript, matches callers to customer records, and creates call summaries, lead scores, and confirmed appointments. The WebSocket validates Exotel Basic Auth. The Settings page shows non-secret readiness fields, and `python -m app.telephony_setup` prints the manual Exotel Voicebot flow configuration. A real number still needs an AgentStream-enabled Exotel account, an assigned ExoPhone/flow, public WSS hosting, Exotel credentials, and a Sarvam key. See [the inbound phone setup](docs/TELEPHONY_SETUP.md).
+
+Browser voice calls can also be recorded after the operator confirms the caller has been informed and agrees. Audio is uploaded at call end, linked to the conversation/customer and timestamp, and exposed through an admin-protected manager playback page. Files are stored under `backend/data/recordings`; deployments must use persistent private storage and protect access to the dashboard/API. This browser recording feature does not record Exotel phone calls.
 
 ## Technology
 
 - **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, and chart/UI components with a monochrome editorial visual system and subtle reduced-motion-aware background animation.
 - **Backend:** Python, FastAPI, Pydantic, SQLAlchemy, and SQLite.
 - **AI and retrieval:** Google Gemini, BM25 document search, Hindi query expansion/translation fallback, and optional embedding-based retrieval; demo templates remain available if no model is configured.
-- **Phone channel:** Twilio Programmable Voice, speech/DTMF Gather, English and Hindi India locales, signature-validated FastAPI webhooks.
+- **Phone channel:** Exotel AgentStream WebSocket with Basic Auth; Sarvam realtime STT/TTS in Hindi and English; shared FastAPI SalesAgent and CRM workflow.
 - **Documents and operations:** PDF/TXT/Markdown knowledge uploads, CRM, analytics, and appointment management.
 
 ## Run locally

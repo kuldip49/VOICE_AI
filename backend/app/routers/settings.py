@@ -1,4 +1,6 @@
 """Settings: business profile, agent instructions, scheduling, scoring, voice + environment status."""
+from urllib.parse import urlparse
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -14,6 +16,13 @@ from ..services.settings_store import DEFAULTS, all_settings, set_setting
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 
 
+def _exotel_stream_configured(url: str, sample_rate: int) -> bool:
+    parsed = urlparse(url)
+    return (sample_rate == 16000 and parsed.scheme == "wss" and bool(parsed.netloc)
+            and parsed.path == "/api/telephony/exotel/stream" and parsed.query == "sample-rate=16000"
+            and not parsed.username and not parsed.password and not parsed.fragment)
+
+
 @router.get("/public")
 def public_settings(db: Session = Depends(get_db)):
     """Non-sensitive values the customer-facing agent UI needs."""
@@ -25,6 +34,7 @@ def public_settings(db: Session = Depends(get_db)):
 @router.get("", dependencies=[Depends(require_admin)])
 def get_all(db: Session = Depends(get_db)):
     cfg = get_settings()
+    stream_configured = _exotel_stream_configured(cfg.exotel_public_wss_url, cfg.exotel_sample_rate)
     has_emb = db.execute(select(func.count(KnowledgeChunk.id)).where(KnowledgeChunk.embedding.is_not(None))).scalar_one()
     return {
         "settings": all_settings(db),
@@ -40,12 +50,15 @@ def get_all(db: Session = Depends(get_db)):
             "calendar_provider": calendar_adapter().name,
             "chunks_with_embeddings": has_emb,
             "telephony": {
-                "provider": "twilio",
-                "phone_number": cfg.twilio_phone_number or None,
-                "account_configured": bool(cfg.twilio_account_sid and cfg.twilio_auth_token),
-                "webhook_configured": cfg.twilio_public_base_url.startswith("https://"),
-                "ready": bool(cfg.twilio_account_sid and cfg.twilio_auth_token and cfg.twilio_phone_number
-                             and cfg.twilio_public_base_url.startswith("https://")),
+                "provider": "exotel",
+                "phone_number": cfg.exotel_phone_number or None,
+                "account_configured": bool(cfg.exotel_account_sid and cfg.exotel_api_key and cfg.exotel_api_token),
+                "stream_configured": stream_configured,
+                "speech_configured": bool(cfg.sarvam_api_key),
+                "wss_url": cfg.exotel_public_wss_url or None,
+                "ready": bool(cfg.exotel_account_sid and cfg.exotel_api_key and cfg.exotel_api_token
+                             and cfg.exotel_phone_number and stream_configured
+                             and cfg.sarvam_api_key),
             },
         },
     }

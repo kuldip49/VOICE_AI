@@ -12,6 +12,7 @@ from .. import serializers as ser
 from ..database import get_db
 from ..models import Customer, CustomerMemory, Lead, SentimentRecord
 from ..security import require_admin
+from ..services.lead_rescue import build_lead_rescue_brief
 
 router = APIRouter(prefix="/api", tags=["crm"], dependencies=[Depends(require_admin)])
 
@@ -84,6 +85,16 @@ def lead_detail(customer_id: int, db: Session = Depends(get_db)):
                         "recommended_action": s.recommended_action, "objections": s.objections,
                         "created_at": ser.iso(s.created_at)} for s in sentiments],
     }
+
+
+@router.post("/leads/{customer_id}/rescue-brief")
+def lead_rescue_brief(customer_id: int, db: Session = Depends(get_db)):
+    customer = db.get(Customer, customer_id)
+    if not customer:
+        raise HTTPException(404, "Customer not found")
+    if not customer.lead:
+        raise HTTPException(404, "Lead not found")
+    return build_lead_rescue_brief(db, customer)
 
 
 class LeadPatch(BaseModel):

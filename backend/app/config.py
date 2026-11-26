@@ -31,12 +31,18 @@ class Settings(BaseSettings):
     ollama_model: str = "llama3.2"
     llm_timeout_seconds: float = 30.0
 
-    # Inbound business phone calls (Twilio Programmable Voice)
-    twilio_account_sid: str = ""
-    twilio_auth_token: str = ""
-    twilio_phone_number: str = ""
-    twilio_public_base_url: str = ""  # public HTTPS origin used to validate signed callbacks
-    twilio_speech_model: str = "experimental_conversations"
+    # Inbound phone calls (Exotel AgentStream + Sarvam realtime speech)
+    exotel_account_sid: str = ""
+    exotel_api_key: str = ""
+    exotel_api_token: str = ""
+    exotel_phone_number: str = ""  # ExoPhone in E.164 format
+    exotel_public_wss_url: str = ""  # public WSS URL configured in Exotel's Voicebot applet
+    exotel_sample_rate: int = 16000
+    sarvam_api_key: str = ""
+    sarvam_stt_model: str = "saaras:v4"
+    sarvam_tts_model: str = "bulbul:v3"
+    sarvam_voice_en: str = "ishita"
+    sarvam_voice_hi: str = "priya"
 
     # Security
     admin_api_key: str = ""  # when set, CRM/admin endpoints require header X-Admin-Key

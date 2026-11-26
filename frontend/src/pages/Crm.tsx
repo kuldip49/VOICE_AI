@@ -1,4 +1,4 @@
-import { Download, Search, Trash2, Users } from 'lucide-react'
+import { Check, Clipboard, Download, Search, Sparkles, Trash2, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -20,6 +20,24 @@ const STATUSES = ['new', 'contacted', 'qualified', 'won', 'lost']
 function LeadDrawer({ id, onClose, onChanged }: { id: number; onClose: () => void; onChanged: () => void }) {
   const { data, error, loading, reload } = useApi(() => api.lead(id), [id])
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [rescue, setRescue] = useState<Awaited<ReturnType<typeof api.leadRescueBrief>> | null>(null)
+  const [rescueLoading, setRescueLoading] = useState(false)
+  const [copiedDraft, setCopiedDraft] = useState(false)
+
+  const createRescueBrief = async () => {
+    setRescueLoading(true)
+    try { setRescue(await api.leadRescueBrief(id)) }
+    catch (e) { toast.error(e instanceof Error ? e.message : 'Could not create the brief') }
+    finally { setRescueLoading(false) }
+  }
+  const copyFollowUp = async () => {
+    if (!rescue) return
+    try {
+      await navigator.clipboard.writeText(rescue.follow_up_draft)
+      setCopiedDraft(true)
+      window.setTimeout(() => setCopiedDraft(false), 1800)
+    } catch { toast.error('Clipboard access is unavailable in this browser') }
+  }
 
   const setStatus = async (status: string) => {
     try { await api.updateLead(id, { status }); toast.success(`Status set to ${status}`); reload(true); onChanged() }
@@ -62,6 +80,29 @@ function LeadDrawer({ id, onClose, onChanged }: { id: number; onClose: () => voi
               <TabsList className="px-6"><TabsTrigger value="profile">Profile</TabsTrigger><TabsTrigger value="conversations">Conversations ({data.conversations.length})</TabsTrigger><TabsTrigger value="memory">Saved facts</TabsTrigger></TabsList>
               <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
                 <TabsContent value="profile" className="space-y-6">
+                  <section className="rounded-lg border bg-accent/35">
+                    <div className="flex flex-wrap items-start justify-between gap-3 border-b px-4 py-3">
+                      <div>
+                        <h3 className="flex items-center gap-2 text-sm font-semibold"><Sparkles className="size-4 text-primary" />Lead Rescue Brief</h3>
+                        <p className="mt-0.5 text-[12px] text-muted-foreground">Find the conversion risk and a grounded next step.</p>
+                      </div>
+                      {!rescue && <Button size="sm" onClick={createRescueBrief} disabled={rescueLoading}>
+                        <Sparkles />{rescueLoading ? 'Preparing…' : 'Build brief'}
+                      </Button>}
+                    </div>
+                    {rescue && (
+                      <div className="space-y-4 px-4 py-4 text-[13px]">
+                        <div><p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Why this lead may stall</p><p className="mt-1 leading-relaxed">{rescue.risk_reason}</p></div>
+                        <div><p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Recommended next move</p><p className="mt-1 leading-relaxed">{rescue.next_action}</p></div>
+                        <div>
+                          <div className="flex items-center justify-between gap-2"><p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Ready-to-send follow-up</p><Button size="sm" variant="outline" onClick={copyFollowUp}><Clipboard />{copiedDraft ? <><Check />Copied</> : 'Copy'}</Button></div>
+                          <p className="mt-2 whitespace-pre-line rounded-md border bg-background px-3 py-2.5 leading-relaxed">{rescue.follow_up_draft}</p>
+                        </div>
+                        {rescue.knowledge_sources.length > 0 && <p className="text-[11px] text-muted-foreground">Grounded in: {rescue.knowledge_sources.map((s) => s.title || s.document).join(', ')}</p>}
+                        <p className="text-[11px] text-muted-foreground">Prepared by {rescue.generated_by}; review before sending.</p>
+                      </div>
+                    )}
+                  </section>
                   <dl className="grid grid-cols-[120px_1fr] gap-x-4 gap-y-2 text-[13px]">
                     <dt className="text-muted-foreground">Email</dt><dd>{unknown(data.email)}</dd>
                     <dt className="text-muted-foreground">Phone</dt><dd>{unknown(data.phone)}</dd>

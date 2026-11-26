@@ -1,4 +1,4 @@
-import { BarChart3, BookOpen, CalendarClock, LayoutDashboard, Menu, Moon, PhoneCall, Settings, Sun, Users, X } from 'lucide-react'
+import { BarChart3, BookOpen, CalendarClock, LayoutDashboard, Menu, Moon, PhoneCall, Play, Settings, Sun, Users, X } from 'lucide-react'
 import { Suspense, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { ProviderBadge } from '@/components/domain'
@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 export const NAV = [
   { to: '/', label: 'Overview', icon: LayoutDashboard },
   { to: '/agent', label: 'Live agent', icon: PhoneCall },
+  { to: '/recordings', label: 'Call recordings', icon: Play },
   { to: '/crm', label: 'Leads', icon: Users },
   { to: '/appointments', label: 'Appointments', icon: CalendarClock },
   { to: '/knowledge', label: 'Knowledge base', icon: BookOpen },

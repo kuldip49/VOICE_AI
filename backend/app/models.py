@@ -182,6 +182,19 @@ class TelephonyCall(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
 
 
+class CallRecording(Base):
+    """Private browser-call audio; only served through the authenticated admin API."""
+    __tablename__ = "call_recordings"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id", ondelete="CASCADE"), unique=True, index=True)
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customers.id", ondelete="CASCADE"), index=True)
+    storage_key: Mapped[str] = mapped_column(String(80), unique=True)
+    content_type: Mapped[str] = mapped_column(String(100), default="audio/webm")
+    size_bytes: Mapped[int] = mapped_column(Integer)
+    duration_seconds: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
+
+
 class SentimentRecord(Base):
     __tablename__ = "sentiment_records"
     id: Mapped[int] = mapped_column(primary_key=True)

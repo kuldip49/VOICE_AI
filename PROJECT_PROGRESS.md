@@ -1,16 +1,16 @@
 # PROJECT_PROGRESS
 
-Last update: 2026-11-26 (Twilio inbound phone integration). Statuses: NOT STARTED · IN PROGRESS · BLOCKED · IMPLEMENTED · TESTED · VERIFIED (= tested + checked in a real browser).
+Last update: 2026-11-26 (Exotel AgentStream phone path). Statuses: NOT STARTED · IN PROGRESS · BLOCKED · IMPLEMENTED · TESTED · VERIFIED (= tested + checked in a real browser).
 
 ## Current status
-Functional MVP rebranded as Kiln & Signal. The inbound Twilio phone-call backend now reuses the Gemini/RAG sales agent, CRM, appointment and summary pipeline, with signed webhooks and English/Hindi keypad language choice. The Settings page displays Twilio environment readiness, and a CLI command attaches a Twilio-owned number to the call webhooks. Gemini and Twilio credentials remain in the ignored local `backend/.env`; no keys are stored in this repository. Live calls still need a public HTTPS URL and a number owned by the configured Twilio account.
+Functional MVP rebranded as Kiln & Signal. The inbound phone path now uses Exotel AgentStream WebSockets, Sarvam streaming speech-to-text/speech synthesis, and the existing SalesAgent/RAG/CRM/appointment/summary flow. Settings shows Exotel and Sarvam readiness; the setup helper prints the manual Voicebot applet values. This integration is implemented in code but has not been connected to a live number or account. Deployment still needs AgentStream enabled, an ExoPhone assigned to a flow, public WSS hosting, Exotel credentials, and a Sarvam key. No new verification or live-call test was run for this provider change.
 
 ## Features
 | Feature | Status | Evidence |
 |---|---|---|
 | Text conversation | VERIFIED | `test_full_sales_workflow`, browser steps 2-10 |
 | Voice: STT/TTS, mic meter, hands-free, barge-in, mute, stop | IMPLEMENTED | Code + unsupported/blocked-mic UI verified; live mic not testable headless. **Test in Chrome/Edge on PC** |
-| Inbound phone calls (Twilio, speech turns, Gemini/RAG, CRM, summaries) | IMPLEMENTED (external setup pending) | Webhook routes, Settings readiness panel, setup CLI, and guide; frontend production build passes | A public HTTPS webhook URL and a voice number owned by the configured Twilio account are needed before a live call. Trial accounts restrict inbound callers to verified numbers. |
+| Inbound phone calls (Exotel AgentStream + Sarvam speech, SalesAgent/RAG, CRM, summaries) | IMPLEMENTED (external setup pending; not live-verified) | WebSocket route/bridge, Settings readiness panel, setup helper and guide | Requires AgentStream entitlement, assigned ExoPhone flow, public WSS endpoint, Exotel credentials and Sarvam key. No live call or provider verification was run for this change. |
 | English + Hindi | VERIFIED (text) | `test_hindi_workflow`, browser step 7 |
 | Contextual + persistent memory, context window | TESTED | `test_contextual_memory…`, `test_persistent_memory…`, `test_context_window_rolls_summary` |
 | RAG: upload PDF/TXT, chunk, BM25, sources, not-found guard | VERIFIED | `tests/test_rag.py` (9), Knowledge page step |

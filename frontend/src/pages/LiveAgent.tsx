@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpen, Check, ChevronDown, Loader2, Mic, MicOff, PhoneCall, PhoneOff, Send, Square, Volume2, VolumeX, Wrench, X } from 'lucide-react'
+import { AlertTriangle, BookOpen, Check, ChevronDown, Circle, Loader2, Mic, MicOff, PhoneCall, PhoneOff, Send, Square, Volume2, VolumeX, Wrench, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -110,7 +110,12 @@ export default function LiveAgent() {
   const [muted, setMuted] = useState(false)
   const [handsFree, setHandsFree] = useState(voiceSupport.stt)
   const [offered, setOffered] = useState<string[]>([])
+  const [recording, setRecording] = useState(false)
   const activeRef = useRef(false)
+  const recorderRef = useRef<MediaRecorder | null>(null)
+  const recordingStreamRef = useRef<MediaStream | null>(null)
+  const recordingChunksRef = useRef<Blob[]>([])
+  const recordingStartedRef = useRef<number | null>(null)
   const mutedRef = useRef(muted)
   const handsFreeRef = useRef(handsFree)
   const rateRef = useRef(1)
@@ -131,6 +136,71 @@ export default function LiveAgent() {
     if (!mutedRef.current) await voice.speak(content, LOCALE[(l as Lang)] ?? LOCALE.en, rateRef.current)
   }, [voice])
 
+  const beginRecording = async () => {
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      throw new Error('This browser cannot record calls. Use a recent version of Chrome or Edge.')
+    }
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    try {
+      const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find((type) => MediaRecorder.isTypeSupported(type))
+      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream)
+      recordingChunksRef.current = []
+      recordingStreamRef.current = stream
+      recordingStartedRef.current = Date.now()
+      recorder.ondataavailable = (event) => { if (event.data.size) recordingChunksRef.current.push(event.data) }
+      recorderRef.current = recorder
+      recorder.start(1000)
+      setRecording(true)
+    } catch (error) {
+      stream.getTracks().forEach((track) => track.stop())
+      throw error
+    }
+  }
+
+  const discardRecording = () => {
+    const recorder = recorderRef.current
+    recorderRef.current = null
+    if (recorder && recorder.state !== 'inactive') recorder.stop()
+    recordingStreamRef.current?.getTracks().forEach((track) => track.stop())
+    recordingStreamRef.current = null
+    recordingChunksRef.current = []
+    recordingStartedRef.current = null
+    setRecording(false)
+  }
+
+  useEffect(() => () => {
+    const recorder = recorderRef.current
+    recorderRef.current = null
+    if (recorder && recorder.state !== 'inactive') recorder.stop()
+    recordingStreamRef.current?.getTracks().forEach((track) => track.stop())
+    recordingStreamRef.current = null
+    recordingChunksRef.current = []
+  }, [])
+
+  const saveRecording = useCallback(async (conversationId: string) => {
+    const recorder = recorderRef.current
+    if (!recorder) return
+    recorderRef.current = null
+    const blob = await new Promise<Blob>((resolve) => {
+      recorder.onstop = () => resolve(new Blob(recordingChunksRef.current, { type: recorder.mimeType || 'audio/webm' }))
+      if (recorder.state === 'inactive') resolve(new Blob(recordingChunksRef.current, { type: recorder.mimeType || 'audio/webm' }))
+      else recorder.stop()
+    })
+    recordingStreamRef.current?.getTracks().forEach((track) => track.stop())
+    recordingStreamRef.current = null
+    const seconds = Math.max(0, Math.round((Date.now() - (recordingStartedRef.current ?? Date.now())) / 1000))
+    recordingStartedRef.current = null
+    recordingChunksRef.current = []
+    setRecording(false)
+    if (!blob.size) return
+    try {
+      await api.uploadRecording(conversationId, blob, seconds)
+      toast.success('Call recording saved for manager review.')
+    } catch (e) {
+      toast.error(e instanceof Error ? `Call ended, but recording could not be saved: ${e.message}` : 'Call ended, but recording could not be saved')
+    }
+  }, [])
+
   const finishCall = useCallback(async (id: string) => {
     activeRef.current = false
     voice.abortListening()
@@ -144,9 +214,10 @@ export default function LiveAgent() {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Could not end the call')
     } finally {
+      await saveRecording(id)
       setBusy(null)
     }
-  }, [voice])
+  }, [saveRecording, voice])
 
   const send = useCallback(async (content: string, channel: 'voice' | 'text', convId?: string): Promise<boolean> => {
     const id = convId ?? conv?.id
@@ -185,12 +256,23 @@ export default function LiveAgent() {
   }, [lang, send, voice])
 
   const startCall = async () => {
+    const voiceCall = voiceSupport.stt
+    if (voiceCall && !window.confirm('This voice conversation will be recorded and stored for manager review. Continue only if the caller has been informed and agrees.')) return
     setBusy('starting')
     setSummary(null)
     setLead(null); setCustomer(null); setSentiment(null); setCalls({}); setOffered([])
-    if (voiceSupport.stt) await voice.requestPermission()
+    if (voiceCall) {
+      const permission = await voice.requestPermission()
+      if (!permission) { setBusy(null); return }
+      try { await beginRecording() }
+      catch (e) {
+        setBusy(null)
+        toast.error(e instanceof Error ? e.message : 'Could not start recording')
+        return
+      }
+    }
     try {
-      const c = await api.startConversation(lang, voiceSupport.stt ? 'voice' : 'text')
+      const c = await api.startConversation(lang, voiceCall ? 'voice' : 'text')
       setConv(c)
       setMessages(c.messages ?? [])
       activeRef.current = true
@@ -199,6 +281,7 @@ export default function LiveAgent() {
       if (greet) await say(greet.content, lang)
       if (voiceSupport.stt && handsFreeRef.current && activeRef.current) void listenLoop(c.id)
     } catch (e) {
+      discardRecording()
       setBusy(null)
       toast.error(e instanceof Error ? e.message : 'Could not start the conversation')
     }
@@ -254,6 +337,11 @@ export default function LiveAgent() {
           <div className="flex items-start gap-2 border-b bg-warm-soft px-5 py-2.5 text-[13px] text-warm" role="status">
             <AlertTriangle className="mt-0.5 size-4 shrink-0" />
             <span>{voice.error ?? 'Voice input is not supported in this browser (use Chrome or Edge). You can still type; replies are read aloud if speech output is available.'}</span>
+          </div>
+        )}
+        {live && recording && (
+          <div className="flex items-center gap-2 border-b bg-hot-soft px-5 py-2 text-[12px] font-medium text-hot" role="status">
+            <Circle className="size-2 fill-current" /> Recording is active. It will be saved to Call recordings when the conversation ends.
           </div>
         )}
         {live && lang === 'hi' && voiceSupport.tts && voice.voices.length > 0 && !voice.hasVoiceFor('hi-IN') && (

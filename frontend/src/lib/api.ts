@@ -15,6 +15,8 @@ export interface TurnResponse { conversation: Conversation; user_message: Messag
 export interface Appointment { id: number; customer_id: number; customer_name: string | null; conversation_id: string | null; start_time: string; end_time: string; label: string; status: string; topic: string; notes: string | null; created_at: string }
 export interface LeadRow extends Customer { lead: Lead; conversation_count: number; last_contact: string | null; upcoming_appointment: Appointment | null; last_sentiment: string | null }
 export interface LeadDetail extends LeadRow { memories: { key: string; value: string; updated_at: string }[]; conversations: Conversation[]; appointments: Appointment[]; sentiments: (Sentiment & { created_at: string })[] }
+export interface LeadRescueBrief { risk_reason: string; next_action: string; follow_up_draft: string; generated_by: string; knowledge_sources: { document: string; title: string; excerpt: string }[] }
+export interface CallRecording { id: number; conversation_id: string; customer_id: number; customer_name: string; started_at: string | null; ended_at: string | null; duration_seconds: number; size_bytes: number; content_type: string; created_at: string }
 export interface KnowledgeDoc { id: number; filename: string; content_type: string; size_bytes: number; status: 'processing' | 'ready' | 'failed'; chunk_count: number; error: string | null; created_at: string }
 export interface SearchResult { found: boolean; method: string; top_score: number | null; threshold: number; results: (Source & { content: string })[] }
 export interface ProviderStatus { configured_provider: string; active: string; mode: 'llm' | 'demo'; grok_key_present: boolean; grok_model: string; gemini_key_present: boolean; ollama_url: string; ollama_model: string; embeddings: boolean }
@@ -39,7 +41,7 @@ export interface SettingsBundle {
     lead_scoring: { weights: Record<string, number>; hot_threshold: number; warm_threshold: number }
     voice: { default_language: string; speech_rate: number; auto_speak: boolean }
   }
-  environment: { environment: string; database: string; provider: ProviderStatus; admin_auth_enabled: boolean; cors_origins: string[]; max_upload_mb: number; rate_limit_per_minute: number; timezone: string; calendar_provider: string; chunks_with_embeddings: number; telephony: { provider: string; phone_number: string | null; account_configured: boolean; webhook_configured: boolean; ready: boolean } }
+  environment: { environment: string; database: string; provider: ProviderStatus; admin_auth_enabled: boolean; cors_origins: string[]; max_upload_mb: number; rate_limit_per_minute: number; timezone: string; calendar_provider: string; chunks_with_embeddings: number; telephony: { provider: string; phone_number: string | null; account_configured: boolean; stream_configured: boolean; speech_configured: boolean; wss_url: string | null; ready: boolean } }
 }
 export interface PublicSettings { business_profile: { company_name: string; agent_name: string }; lead_scoring_weights: Record<string, number>; voice: SettingsBundle['settings']['voice']; provider: ProviderStatus; auth_required: boolean }
 
@@ -97,6 +99,19 @@ export const api = {
   sendMessage: (id: string, text: string, channel: 'voice' | 'text') =>
     request<TurnResponse>(`/conversations/${id}/messages`, { method: 'POST', body: json({ text, channel }) }),
   endConversation: (id: string) => request<Conversation>(`/conversations/${id}/end`, { method: 'POST' }),
+  uploadRecording: (id: string, blob: Blob, durationSeconds: number) => {
+    const form = new FormData()
+    const ext = blob.type.includes('mp4') ? 'mp4' : blob.type.includes('ogg') ? 'ogg' : 'webm'
+    form.append('file', blob, `conversation.${ext}`)
+    return request<CallRecording>(`/conversations/${id}/recording?duration_seconds=${durationSeconds}`, { method: 'POST', body: form })
+  },
+  recordings: () => request<CallRecording[]>('/recordings'),
+  recordingAudio: async (id: number) => {
+    const key = adminKey.get()
+    const res = await fetch(`/api/recordings/${id}/audio`, { headers: key ? { 'X-Admin-Key': key } : {} })
+    if (!res.ok) throw new ApiError(res.status, res.status === 401 ? 'Admin key required.' : `Audio unavailable (HTTP ${res.status})`)
+    return res.blob()
+  },
   conversations: () => request<Conversation[]>('/conversations'),
   toolLogs: (id: string) => request<{ id: number; tool: string; input: unknown; output: unknown; success: boolean; error: string | null; duration_ms: number; created_at: string }[]>(`/conversations/${id}/tool-logs`),
   leads: (p: { q?: string; category?: string; status?: string; sort?: string }) => {
@@ -104,6 +119,7 @@ export const api = {
     return request<LeadRow[]>(`/leads?${qs}`)
   },
   lead: (id: number) => request<LeadDetail>(`/leads/${id}`),
+  leadRescueBrief: (id: number) => request<LeadRescueBrief>(`/leads/${id}/rescue-brief`, { method: 'POST' }),
   updateLead: (id: number, body: Partial<{ status: string; name: string; email: string; phone: string }>) =>
     request<LeadRow>(`/leads/${id}`, { method: 'PATCH', body: json(body) }),
   deleteLead: (id: number) => request<{ deleted: number }>(`/leads/${id}`, { method: 'DELETE' }),

@@ -28,9 +28,9 @@ cd frontend; npm install; cd ..
 
 Open **http://localhost:5173/agent**, click **Start call**, allow the microphone, and talk.
 
-### Connect an actual phone number
+### Optional: connect an actual phone number
 
-Inbound calls use Twilio Programmable Voice and the same Gemini/RAG sales agent. Configure the Twilio account, owned voice number, and publicly reachable HTTPS backend URL in `backend/.env`, then run `python -m app.telephony_setup` from `backend/` to attach the number to the webhook. The Settings page shows which values are present. Callers press 1 for English or 2 for Hindi. The backend checks Twilio signatures and saves the phone transcript, lead, bookings, and summary in the existing CRM. Follow [Inbound phone calls](docs/TELEPHONY_SETUP.md) for setup and trial-account limits.
+Inbound calls use Exotel AgentStream and the same sales agent, with Sarvam realtime speech recognition and speech output. Configure Exotel credentials, an ExoPhone, a public WSS endpoint, and a Sarvam key in `backend/.env`; then run `python -m app.telephony_setup` from `backend/` for the Exotel console steps. In Exotel, assign the number to an App Bazaar flow with a Voicebot applet. The Settings page shows which values are present. Callers can speak English or Hindi and press 9 to switch languages. Follow [Inbound phone calls](docs/TELEPHONY_SETUP.md) for setup and trial/account limits. Exotel AgentStream and Sarvam usage may incur charges; code alone does not provision a phone number.
 
 ### Turn on a real LLM (optional, free options)
 
@@ -59,14 +59,15 @@ Full 5-minute script: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
 | Module | Where |
 |---|---|
 | Voice conversation (Web Speech STT/TTS, mic level meter, hands-free, barge-in, mute, stop speaking, text fallback) | `frontend/src/pages/LiveAgent.tsx`, `frontend/src/hooks/useVoice.ts` |
-| Inbound telephone calls (Twilio voice webhooks, signed requests, Hindi/English speech, Gemini/RAG agent, CRM and summaries) | `backend/app/routers/telephony.py`, `backend/app/telephony_setup.py`, [setup guide](docs/TELEPHONY_SETUP.md) |
+| Consented browser call recordings with caller name/time and private manager playback | `frontend/src/pages/LiveAgent.tsx`, `frontend/src/pages/CallRecordings.tsx`, `backend/app/routers/recordings.py` |
+| Inbound telephone calls (Exotel AgentStream WebSocket, Basic Auth, Sarvam live Hindi/English speech, sales agent, CRM and summaries) | `backend/app/routers/telephony.py`, `backend/app/services/exotel_stream.py`, [setup guide](docs/TELEPHONY_SETUP.md) |
 | Agent orchestration with 10 validated, logged tools | `backend/app/agent/` |
 | RAG: PDF/TXT upload, section chunking, BM25 (+ optional embeddings), source references, "not in KB" guard | `backend/app/services/rag.py` |
 | Contextual + persistent memory, context window with rolling summary, inspect/delete memories | `orchestrator.py`, `customer_memories` table, CRM drawer |
 | Lead extraction + transparent 0-100 scoring (HOT/WARM/COLD, reasons stored) | `services/extraction.py`, `services/scoring.py` |
 | Sentiment (6 labels) + objections + recommended action | `services/sentiment.py` |
 | Appointments: slots, confirm-before-book, double-booking prevention (app check + DB unique index), cancel, reschedule | `services/scheduling.py` |
-| CRM: search, filter, sort, profile, transcripts, status, delete (cascade), CSV export | `routers/crm.py`, `pages/Crm.tsx` |
+| CRM: search, filter, sort, profile, transcripts, status, delete (cascade), CSV export, and an evidence-grounded Lead Rescue Brief with a copyable follow-up draft | `routers/crm.py`, `services/lead_rescue.py`, `pages/Crm.tsx` |
 | Call summaries | `services/summary.py` |
 | Analytics from real rows (empty states when no data) | `routers/analytics.py`, `pages/Analytics.tsx` |
 | Settings: business profile, agent prompt, scoring weights, availability, voice, environment status | `routers/settings.py`, `pages/Settings.tsx` |
@@ -98,7 +99,7 @@ Every row below has a green check for a contribution that is present and evidenc
 | Gemini / Ollama answers | ✅ Both provider adapters are implemented | ✅ Gemini generation checked live; provider HTTP behavior is covered by mocked tests | Ollama was not run as a local service here. Gemini keys are local and are not in GitHub. |
 | Embedding hybrid retrieval | ✅ Optional hybrid ranking is implemented | ✅ Live Gemini embedding and hybrid retrieval checked against an in-memory knowledge base | Existing chunks without vectors use BM25 until embeddings are generated for them. |
 | Browser speech recognition and playback | ✅ Uses browser Web Speech APIs | ✅ Frontend production build passes; unsupported and blocked-microphone UI paths are covered by the recorded browser checks | A live microphone conversation still needs a Chrome/Edge check on the target device. |
-| Twilio inbound phone assistant | ✅ Webhook integration is implemented | ⚠️ External phone call not configured here | A Twilio voice number, public HTTPS backend URL, and local Twilio auth token are required before anyone can dial it. See [setup guide](docs/TELEPHONY_SETUP.md). |
+| Exotel inbound phone assistant | ✅ WebSocket bridge and Sarvam speech integration are implemented | ⚠️ External phone call not configured here | An Exotel AgentStream-enabled account, ExoPhone assigned to a Voicebot flow, public WSS host, Exotel credentials and Sarvam key are required. AgentStream may be separately priced. See [setup guide](docs/TELEPHONY_SETUP.md). |
 | Docker Compose | ✅ Compose and container files are included | ✅ `docker compose config --quiet` passes | Image build was not run because Docker Desktop's engine was unavailable in this session. |
 | Local appointment calendar and provider seam | ✅ Local database calendar and adapter interface are implemented | ✅ Appointment booking tests pass in the backend suite | A Google Calendar API adapter is future work; local database scheduling is active. |
 | 100,000-user architecture | ✅ A scaling design and roadmap are documented in [docs/SCALABILITY.md](docs/SCALABILITY.md) | ✅ Design assumptions and implementation boundaries are documented | Design only: no 100,000-user load test or production deployment is claimed. |

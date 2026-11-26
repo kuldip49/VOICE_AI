@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .config import get_settings
-from .routers import analytics, appointments, conversations, crm, knowledge, settings, telephony
+from .routers import analytics, appointments, conversations, crm, knowledge, recordings, settings, telephony
 from .seed import init_db, seed_knowledge
 from .services.llm import provider_status
 
@@ -39,6 +39,6 @@ def health():
     return {"status": "ok", "llm": provider_status()["active"]}
 
 
-for r in (conversations.router, conversations.admin, crm.router, appointments.router, knowledge.router,
+for r in (conversations.router, conversations.admin, crm.router, recordings.router, appointments.router, knowledge.router,
           analytics.router, settings.router, telephony.router):
     app.include_router(r)

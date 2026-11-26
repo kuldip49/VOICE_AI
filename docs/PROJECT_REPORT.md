@@ -44,6 +44,8 @@ The agent follows a fixed, inspectable workflow: save the customer message; extr
 
 The backend initializes tables and seeds sample knowledge documents at startup. The frontend uses lazy-loaded routes and sends requests to `/api`; the Vite dev server proxies those requests to FastAPI.
 
+Inbound calls use a separate Exotel AgentStream path: Exotel's Voicebot applet opens the FastAPI WSS endpoint, Sarvam streams caller speech to text and the agent's reply back to speech, and the same SalesAgent/CRM code handles the turn. Live use requires an AgentStream-enabled Exotel account, an assigned ExoPhone flow, public WSS hosting, and Exotel/Sarvam credentials; this workspace has not been connected to a live number.
+
 ### Technology stack
 
 - **Backend:** Python, FastAPI, Pydantic, SQLAlchemy, SQLite, pypdf, and httpx.
@@ -60,7 +62,7 @@ The React 19, TypeScript, and Vite app includes:
 
 - **Overview:** recent activity and headline metrics.
 - **Live Agent:** text and voice conversations, transcript, sources, sentiment, lead score, and agent tool trace.
-- **CRM:** lead search, filters, profiles, conversation history, saved memories, status updates, deletion, and CSV export.
+- **CRM:** lead search, filters, profiles, conversation history, saved memories, status updates, deletion, CSV export, and a Lead Rescue Brief with conversion risk, recommended action, and a copyable follow-up draft grounded in conversation and relevant knowledge-base evidence.
 - **Appointments:** slot list, booking, cancellation, and rescheduling.
 - **Knowledge:** upload, inspect, search, and delete PDF, TXT, and Markdown documents.
 - **Analytics:** lead, sentiment, question, objection, product, and appointment metrics.

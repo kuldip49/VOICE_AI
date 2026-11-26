@@ -13,14 +13,17 @@ flowchart LR
   end
   subgraph Backend["FastAPI backend"]
     API["REST API /api/*"]
+    STREAM["Exotel AgentStream WSS bridge"]
     AGENT["Agent orchestrator"]
     TOOLS["10 validated tools + logs"]
     RAG["RAG: chunks + BM25 (+embeddings)"]
     SCORE["Scoring, sentiment, extraction, summaries"]
     CAL["Local calendar"]
   end
-  DB[("SQLite, 12 tables")]
+  DB[("SQLite, 13 tables")]
   LLM["Gemini / Ollama (optional)"]
+  EXO["Exotel ExoPhone + Voicebot flow"]
+  SARVAM["Sarvam realtime STT / TTS"]
   UI <--> STT
   UI <--> TTS
   UI -- "JSON over HTTP (Vite proxy)" --> API --> AGENT --> TOOLS
@@ -28,6 +31,9 @@ flowchart LR
   TOOLS --> SCORE --> DB
   TOOLS --> CAL --> DB
   AGENT -. "grounded prompt" .-> LLM
+  EXO <-->|"16 kHz PCM audio over authenticated WSS"| STREAM
+  STREAM <--> SARVAM
+  STREAM -->|"final transcript"| AGENT
 ```
 
 ## Layers
@@ -45,16 +51,25 @@ flowchart LR
 4. Hands-free mode loops listen → send → speak. Clicking the mic while the agent speaks cancels speech (barge-in).
 5. Unsupported browser / blocked mic / no speech / network errors show a clear banner and the text box keeps working.
 
+### Inbound telephone pipeline
+1. The ExoPhone is assigned to an Exotel App Bazaar flow containing a Voicebot applet.
+2. The applet opens the authenticated `/api/telephony/exotel/stream` WSS endpoint. In Docker, Nginx forwards the WebSocket upgrade to FastAPI; the Vite dev proxy also permits WebSockets.
+3. The bridge forwards 16 kHz mono linear16 caller audio to Sarvam realtime STT. Final transcripts enter the same SalesAgent and CRM workflow used by browser conversations.
+4. Sarvam TTS produces linear16 audio that the bridge streams back to Exotel for playback. Pressing 9 switches English/Hindi; a goodbye closes the conversation and records a summary.
+5. This path is implemented in code, but a live call still needs Exotel AgentStream enablement, a number-to-flow assignment, public WSS hosting, Exotel credentials and a Sarvam key. Provider usage may be charged.
+
 ### Backend (`backend/app/`)
 | File | Responsibility |
 |---|---|
 | `main.py` | App, CORS, generic 500 handler, startup (create tables, seed KB) |
 | `config.py` | Settings from environment / `.env` |
-| `models.py` | 12 SQLAlchemy tables |
+| `models.py` | 13 SQLAlchemy tables |
 | `agent/orchestrator.py` | Per-message pipeline: language → extraction → sentiment → intent planner → tools → scoring → reply |
 | `agent/tools.py` | The 10 tools, Pydantic input schemas, permission list, execution log |
 | `services/rag.py` | Text extraction, chunking, BM25 index, optional embeddings, not-found guard |
 | `services/llm.py` | Provider abstraction: Gemini (REST), Ollama (local), demo |
+| `services/exotel_stream.py` | Exotel/Sarvam streaming audio bridge for inbound phone calls |
+| `routers/telephony.py` | Exotel Basic Auth WebSocket endpoint and shared CRM callbacks |
 | `services/extraction.py`, `scoring.py`, `sentiment.py`, `scheduling.py`, `summary.py` | Sales intelligence + calendar |
 | `routers/*.py` | REST endpoints |
 | `security.py` | Admin key check, rate limiting |

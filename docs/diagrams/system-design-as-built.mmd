@@ -1,0 +1,40 @@
+flowchart LR
+  C[Customer / staff] --> B
+  subgraph Browser[Browser client]
+    B[React 19 + TypeScript dashboard<br/>Overview, Agent, CRM, Appointments,<br/>Knowledge, Analytics, Settings]
+    V[Web Speech API<br/>SpeechRecognition + speechSynthesis]
+    B <--> V
+  end
+  B -->|JSON over same-origin /api| EDGE
+  subgraph Edge[HTTP edge]
+    EDGE[Vite proxy in development<br/>or Nginx in Docker]
+  end
+  EDGE --> API
+  subgraph Backend[FastAPI backend]
+    API[REST routers + Pydantic validation]
+    STREAM[Exotel AgentStream WebSocket bridge<br/>Basic Auth + PCM audio]
+    AGENT[SalesAgent orchestrator<br/>deterministic planner]
+    TOOLS[10 validated tools<br/>audit log]
+    SVC[Business services<br/>extraction, sentiment, scoring,<br/>scheduling, summaries]
+    RAG[Knowledge retrieval<br/>BM25 + optional embeddings]
+    API --> AGENT
+    AGENT --> TOOLS
+    TOOLS --> SVC
+    TOOLS --> RAG
+  end
+  TOOLS --> DB[(SQLAlchemy ORM<br/>SQLite default<br/>13 tables)]
+  RAG --> DB
+  SVC --> DB
+  AGENT -. optional grounded text / embeddings .-> LLM[Gemini / Grok REST<br/>or local Ollama<br/>demo templates available]
+  PHONE[Caller] --> EXO[Exotel ExoPhone<br/>App Bazaar + Voicebot flow]
+  EXO <-->|bidirectional WSS audio| STREAM
+  STREAM <-->|16 kHz linear16 audio / transcript| SARVAM[Sarvam realtime STT + TTS]
+  STREAM -->|final transcript| AGENT
+  STREAM -. external account, number and public WSS required .-> API
+  DB -. future migration / operations .-> FUTURE[PostgreSQL, Redis,<br/>background workers, auth<br/>production roadmap only]
+  classDef active fill:#e8f4f1,stroke:#19695d,color:#143d38
+  classDef optional fill:#fff4df,stroke:#b57617,color:#513b17
+  classDef future fill:#f2effb,stroke:#7462a8,color:#383052
+  class B,V,EDGE,API,STREAM,AGENT,TOOLS,SVC,RAG,DB active
+  class LLM,EXO,SARVAM optional
+  class FUTURE future
