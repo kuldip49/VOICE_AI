@@ -39,6 +39,14 @@ def get_all(db: Session = Depends(get_db)):
             "timezone": cfg.timezone,
             "calendar_provider": calendar_adapter().name,
             "chunks_with_embeddings": has_emb,
+            "telephony": {
+                "provider": "twilio",
+                "phone_number": cfg.twilio_phone_number or None,
+                "account_configured": bool(cfg.twilio_account_sid and cfg.twilio_auth_token),
+                "webhook_configured": cfg.twilio_public_base_url.startswith("https://"),
+                "ready": bool(cfg.twilio_account_sid and cfg.twilio_auth_token and cfg.twilio_phone_number
+                             and cfg.twilio_public_base_url.startswith("https://")),
+            },
         },
     }
 

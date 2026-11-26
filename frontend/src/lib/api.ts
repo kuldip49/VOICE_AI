@@ -39,7 +39,7 @@ export interface SettingsBundle {
     lead_scoring: { weights: Record<string, number>; hot_threshold: number; warm_threshold: number }
     voice: { default_language: string; speech_rate: number; auto_speak: boolean }
   }
-  environment: { environment: string; database: string; provider: ProviderStatus; admin_auth_enabled: boolean; cors_origins: string[]; max_upload_mb: number; rate_limit_per_minute: number; timezone: string; calendar_provider: string; chunks_with_embeddings: number }
+  environment: { environment: string; database: string; provider: ProviderStatus; admin_auth_enabled: boolean; cors_origins: string[]; max_upload_mb: number; rate_limit_per_minute: number; timezone: string; calendar_provider: string; chunks_with_embeddings: number; telephony: { provider: string; phone_number: string | null; account_configured: boolean; webhook_configured: boolean; ready: boolean } }
 }
 export interface PublicSettings { business_profile: { company_name: string; agent_name: string }; lead_scoring_weights: Record<string, number>; voice: SettingsBundle['settings']['voice']; provider: ProviderStatus; auth_required: boolean }
 

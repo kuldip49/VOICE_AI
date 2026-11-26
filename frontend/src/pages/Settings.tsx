@@ -83,7 +83,7 @@ export default function Settings() {
               <Row label="Agent name" hint="Used in greetings"><Input value={biz.value.agent_name} onChange={(e) => biz.setValue({ ...biz.value!, agent_name: e.target.value })} /></Row>
               <Row label="Description"><Textarea value={biz.value.description} onChange={(e) => biz.setValue({ ...biz.value!, description: e.target.value })} /></Row>
               <Row label="Contact email"><Input value={biz.value.contact_email} onChange={(e) => biz.setValue({ ...biz.value!, contact_email: e.target.value })} /></Row>
-              <Row label="Contact phone"><Input value={biz.value.contact_phone} onChange={(e) => biz.setValue({ ...biz.value!, contact_phone: e.target.value })} /></Row>
+              <Row label="Contact phone" hint="Business contact details only; inbound call routing is configured below."><Input value={biz.value.contact_phone} onChange={(e) => biz.setValue({ ...biz.value!, contact_phone: e.target.value })} /></Row>
               <Row label="Products" hint="Recognised from these keywords">
                 <ul className="space-y-1 text-[13px]">{Object.entries(biz.value.products).map(([p, kws]) => <li key={p}><span className="font-medium">{p}</span> <span className="text-muted-foreground">{kws.slice(0, 5).join(', ')}</span></li>)}</ul>
               </Row>
@@ -180,6 +180,18 @@ export default function Settings() {
           </ul>
           <div className="border-t px-5 py-3 text-[12px] text-muted-foreground">
             Change these in <code className="rounded bg-muted px-1">backend/.env</code> and restart the backend. <Badge variant="outline" className="ml-1">{env.environment}</Badge>
+          </div>
+        </Panel>
+        <Panel>
+          <PanelHeader title="Inbound phone" description="Shows environment values. The setup command verifies ownership and connects the number." />
+          <ul className="space-y-2.5 px-5 py-4 text-[13px]">
+            <li><Status ok={env.telephony.account_configured}>Twilio account credentials {env.telephony.account_configured ? 'configured' : 'missing from backend/.env'}</Status></li>
+            <li><Status ok={Boolean(env.telephony.phone_number)}>Number value {env.telephony.phone_number || 'not set in backend/.env'}</Status></li>
+            <li><Status ok={env.telephony.webhook_configured}>Public HTTPS webhook {env.telephony.webhook_configured ? 'configured' : 'missing TWILIO_PUBLIC_BASE_URL'}</Status></li>
+            <li><Status ok={env.telephony.ready}>Environment fields {env.telephony.ready ? 'complete; number ownership not checked' : 'incomplete'}</Status></li>
+          </ul>
+          <div className="border-t px-5 py-3 text-[12px] text-muted-foreground">
+            Run <code className="rounded bg-muted px-1">python -m app.telephony_setup</code> after setting the public URL to connect the number's incoming-call webhook. Details: <code className="rounded bg-muted px-1">docs/TELEPHONY_SETUP.md</code>.
           </div>
         </Panel>
         {access}

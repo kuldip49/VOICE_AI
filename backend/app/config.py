@@ -32,7 +32,9 @@ class Settings(BaseSettings):
     llm_timeout_seconds: float = 30.0
 
     # Inbound business phone calls (Twilio Programmable Voice)
+    twilio_account_sid: str = ""
     twilio_auth_token: str = ""
+    twilio_phone_number: str = ""
     twilio_public_base_url: str = ""  # public HTTPS origin used to validate signed callbacks
     twilio_speech_model: str = "experimental_conversations"
 

@@ -160,8 +160,10 @@ def phone_service_status():
     cfg = get_settings()
     return {
         "provider": "twilio",
-        "configured": bool(RequestValidator and cfg.twilio_auth_token and
-                            cfg.twilio_public_base_url.startswith("https://")),
+        "configured": bool(RequestValidator and cfg.twilio_account_sid and cfg.twilio_auth_token
+                            and cfg.twilio_phone_number and cfg.twilio_public_base_url.startswith("https://")),
+        "phone_number": cfg.twilio_phone_number or None,
+        "webhook_configured": cfg.twilio_public_base_url.startswith("https://"),
         "llm": provider_status()["active"],
         "speech_languages": ["en-IN", "hi-IN"],
     }

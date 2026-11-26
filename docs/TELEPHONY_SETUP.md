@@ -17,27 +17,29 @@ The caller presses **1 for English** or **2 for Hindi**. Twilio then uses the ma
 3. Put these values in `backend/.env` (never commit this file):
 
    ```dotenv
-   TWILIO_PUBLIC_BASE_URL=https://your-public-host.example
+   TWILIO_ACCOUNT_SID=your_twilio_account_sid
    TWILIO_AUTH_TOKEN=your_twilio_auth_token
+   TWILIO_PHONE_NUMBER=+14155550123
+   TWILIO_PUBLIC_BASE_URL=https://your-public-host.example
    LLM_PROVIDER=auto
    GEMINI_API_KEY=your_existing_gemini_key
    ```
 
-   Set `TWILIO_PUBLIC_BASE_URL` to the HTTPS **origin** only, with no endpoint path or trailing slash. Keep Gemini configured on the backend; the phone webhook runs the existing provider selection and records `generated_by` on each reply. Check the non-secret readiness view at `/api/telephony/twilio/status`; `configured` must be `true` and `llm` should show the active model label.
+   Use the account SID and auth token from the Twilio account that owns the number. Set `TWILIO_PHONE_NUMBER` to that Twilio number in E.164 format. Set `TWILIO_PUBLIC_BASE_URL` to the HTTPS **origin** only, with no endpoint path or trailing slash. Keep Gemini configured on the backend; the phone webhook runs the existing provider selection and records `generated_by` on each reply.
 
-4. In the Twilio Console, buy or select a voice-capable phone number. Set its **A call comes in** webhook to:
+4. Connect the number's incoming-call handler from the backend directory:
 
    ```text
-   https://your-public-host.example/api/telephony/twilio/voice
+   ..\.venv\Scripts\python.exe -m app.telephony_setup
    ```
 
-   Choose **HTTP POST**. If the phone number configuration exposes a status callback, set it to:
+   This verifies the number belongs to the configured account, then sets the voice webhook and status callback to the app. It stops without modifying the number if it is already attached to a Voice Application or SIP trunk. You can also configure it manually in the Twilio Console: set **A call comes in** to `https://your-public-host.example/api/telephony/twilio/voice` with **HTTP POST**. If the phone number configuration exposes a status callback, set it to:
 
    ```text
    https://your-public-host.example/api/telephony/twilio/status
    ```
 
-   Also choose **HTTP POST**. The status callback is optional for answering calls, but it lets the app save a summary if someone disconnects without saying goodbye.
+   Choose **HTTP POST** for the status callback too. The status callback is optional for answering calls, but it lets the app save a summary if someone disconnects without saying goodbye.
 
 5. Call the Twilio number from a permitted phone. The caller selects a language, asks a business question, and receives spoken answers from the configured agent. Test RAG answers, caller details, a counselling booking, and ending a call before public use.
 
@@ -45,7 +47,7 @@ Twilio signs every webhook. The backend validates `X-Twilio-Signature` using Twi
 
 ## What has to exist for live calls
 
-The repository contains the inbound call integration, but a code change alone cannot make a reachable phone number. Live calls require a Twilio account with a voice-capable number, a public HTTPS deployment/tunnel, the account auth token set locally, and the number pointed to the webhook above. Twilio phone usage and speech services can incur provider charges; Gemini usage also follows the configured Google account limits/pricing. Availability and supported numbers depend on the Twilio account and country.
+The repository contains the inbound call integration, but a code change alone cannot make a reachable phone number. Live calls require a Twilio account with a voice-capable number owned by that account, a public HTTPS deployment/tunnel, the account credentials set locally, and the number pointed to the webhook above. Twilio trial accounts can only receive inbound calls from caller IDs verified on the trial account, so a trial number is suitable for a restricted demonstration, not for calls from everyone. A demo open to the public needs an upgraded account and an active voice number. Twilio phone usage and speech services can incur provider charges; Gemini usage also follows the configured Google account limits/pricing. Availability and supported numbers depend on the Twilio account and country. See Twilio's [trial account restrictions](https://help.twilio.com/articles/360036052753).
 
 ## Call flow
 
